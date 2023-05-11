@@ -267,7 +267,7 @@ void ht_destroy(ht_t *ht)
  */
 void ht_insert(ht_t *ht, void *key, void *val)
 {
-    if (!ht || !key || !val)
+    if (!ht || !key)
         return;
 
     __ht_rehash(ht);
