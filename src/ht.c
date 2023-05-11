@@ -72,7 +72,7 @@ static size_t __ht_bucket_index(ht_t *ht, void *key)
  */
 static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
 {
-    ht_bucket_t *cur = NULL, *last = NULL;
+    ht_bucket_t *cur = NULL, *prev = NULL;
     size_t idx;
 
     idx = __ht_bucket_index(ht, key);
@@ -91,7 +91,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
         if (!isrehash)
             ht->length++;
     } else {
-        last = ht->buckets + idx;
+        prev = ht->buckets + idx;
         cur  = ht->buckets + idx;
 
         do {
@@ -103,15 +103,15 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
                     val = ht->callbacks.val_copy(val);
 
                 cur->val = val;
-                last = NULL;
+                prev = NULL;
                 break;
             }
 
-            last = cur;
+            prev = cur;
             cur  = cur->next;
         } while (cur);
 
-        if (last) {
+        if (prev) {
             cur = calloc(1, sizeof(*cur->next));
             if (!cur) {
                 perror("ht_add_to_bucket");
@@ -127,7 +127,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
 
             cur->key = key;
             cur->val = val;
-            last->next = cur;
+            prev->next = cur;
 
             if (!isrehash)
                 ht->length++;
@@ -280,7 +280,7 @@ void ht_insert(ht_t *ht, void *key, void *val)
  */
 void ht_remove(ht_t *ht, void *key)
 {
-    ht_bucket_t *cur = NULL, *last = NULL;
+    ht_bucket_t *cur = NULL, *prev = NULL;
     size_t idx;
 
     if (!ht || !key)
@@ -309,12 +309,12 @@ void ht_remove(ht_t *ht, void *key)
         return;
     }
 
-    last = ht->buckets + idx;
-    cur = last->next;
+    prev = ht->buckets + idx;
+    cur = prev->next;
 
     while (!cur) {
         if (ht->keyeq(key, cur->key)) {
-            last->next = cur->next;
+            prev->next = cur->next;
             ht->callbacks.key_free(cur->key);
             ht->callbacks.val_free(cur->val);
             free(cur);
@@ -323,7 +323,7 @@ void ht_remove(ht_t *ht, void *key)
             break;
         }
 
-        last = cur;
+        prev = cur;
         cur = cur->next;
     }
 }
