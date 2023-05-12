@@ -227,8 +227,8 @@ ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks *callbacks)
 }
 
 /**
- * ht_destory:
- *      Destory a hash table first by freeing all buckets then the table itself.
+ * ht_destroy:
+ *      Destroy a hash table first by freeing all buckets then the table itself.
  */
 void ht_destroy(ht_t *ht)
 {
