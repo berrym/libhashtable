@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include "ht.h"
 
 #define INITIAL_BUCKETS (16)    // Initial table size
