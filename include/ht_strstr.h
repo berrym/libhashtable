@@ -15,8 +15,8 @@ typedef struct ht_strstr ht_strstr_t;
 typedef struct ht_strstr_enum ht_strstr_enum_t;
 
 typedef enum {
-    HTABLE_STR_NONE = 0,
-    HTABLE_STR_CASECMP
+    HT_STR_NONE = 0,
+    HT_STR_CASECMP
 } ht_strstr_flags_enum_t;
 
 // Creation and destruction

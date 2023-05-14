@@ -141,7 +141,7 @@ ht_strstr_t *ht_strstr_create(unsigned int flags)
         free
     };
 
-    if (flags & HTABLE_STR_CASECMP) {
+    if (flags & HT_STR_CASECMP) {
         hash = __fnv1a_hash_str_casecmp;
         keyeq = __ht_str_caseeq;
     }

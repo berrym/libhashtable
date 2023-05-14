@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
     ht_strint_t *ht = NULL;
 
-    ht = ht_strint_create(HTABLE_STR_CASECMP);
+    ht = ht_strint_create(HT_STR_CASECMP);
     if (!ht)
         exit(EXIT_FAILURE);
 
