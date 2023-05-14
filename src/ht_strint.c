@@ -151,7 +151,7 @@ ht_strint_t *ht_strint_create(unsigned int flags)
 {
     ht_hash hash = __fnv1a_hash_str;
     ht_keyeq keyeq = __ht_str_eq;
-    ht_callbacks callbacks = {
+    ht_callbacks_t callbacks = {
         (void *(*)(void *))strdup,
         free,
         (void *(*)(void *))__intdup,

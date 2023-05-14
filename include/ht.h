@@ -31,10 +31,10 @@ typedef struct {
     ht_kfree key_free;
     ht_vcopy val_copy;
     ht_vfree val_free;
-} ht_callbacks;
+} ht_callbacks_t;
 
 // Creation and destruction
-ht_t *ht_create(ht_hash, ht_keyeq, ht_callbacks *);
+ht_t *ht_create(ht_hash, ht_keyeq, ht_callbacks_t *);
 void ht_destroy(ht_t *);
 
 // Insertion and removal

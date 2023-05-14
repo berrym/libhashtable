@@ -25,7 +25,7 @@ typedef struct ht_bucket {
 struct ht {                     // typedefed to ht_t in ht.h for external scope
     ht_hash hfunc;
     ht_keyeq keyeq;
-    ht_callbacks callbacks;
+    ht_callbacks_t callbacks;
     ht_bucket_t *buckets;
     size_t capacity;
     size_t length;
@@ -183,7 +183,7 @@ static void __ht_rehash(ht_t *ht)
  *      Create a new hash table of INITIAL_CAPACITY, it requires a hash function, a key equality
  *      comparison function, and optionally bucket operations function callbacks structure.
  */
-ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks *callbacks)
+ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks_t *callbacks)
 {
     ht_t *ht;
 

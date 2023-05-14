@@ -134,7 +134,7 @@ ht_strstr_t *ht_strstr_create(unsigned int flags)
 {
     ht_hash hash = __fnv1a_hash_str;
     ht_keyeq keyeq = __ht_str_eq;
-    ht_callbacks callbacks = {
+    ht_callbacks_t callbacks = {
         (void *(*)(void *))strdup,
         free,
         (void *(*)(void *))strdup,
