@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     char t1[64] = { '\0' };
     char t2[64] = { '\0' };
 
-    ht = ht_strstr_create(HT_STR_CASECMP);
+    ht = ht_strstr_create(HT_STR_CASECMP | HT_SEED_RANDOM);
     if (!ht)
         exit(EXIT_FAILURE);
 
