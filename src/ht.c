@@ -136,7 +136,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
 
 /**
  * __ht_rehash:
- *      Rehash a tree growing it's capacity by GROWTH_FACTOR if it has reached MAX_LOAD_FACTOR,
+ *      Rehash a table growing it's capacity by GROWTH_FACTOR if it has reached MAX_LOAD_FACTOR,
  *      but do not grow table if it's capacity has reached MAX_CAPACITY.
  */
 static void __ht_rehash(ht_t *ht)
