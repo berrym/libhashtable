@@ -113,7 +113,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
         if (prev) {
             cur = calloc(1, sizeof(*cur->next));
             if (!cur) {
-                perror("ht_add_to_bucket");
+                perror("__ht_add_to_bucket");
                 return;
             }
 
