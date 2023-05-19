@@ -17,7 +17,6 @@ typedef struct ht_strint_enum ht_strint_enum_t;
 typedef enum {
     HT_STR_NONE = 0,
     HT_STR_CASECMP,
-    HT_SEED_RANDOM
 } ht_strint_flags_enum_t;
 
 // Creation and destruction

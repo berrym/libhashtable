@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "ht.h"                 // for HT_SEED_RANDOM
 #include "ht_strint.h"
 
 int main(int argc, char **argv)

@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <time.h>
 #include "ht.h"
 
 #define INITIAL_BUCKETS (16)    // Initial table size
@@ -29,6 +31,11 @@ struct ht {                     // typedefed to ht_t in ht.h for external scope
     ht_bucket_t *buckets;
     size_t capacity;
     size_t length;
+#if defined(CPU_32_BIT)
+    uint32_t seed;
+#elif defined(CPU_64_BIT)
+    uint64_t seed;
+#endif
 };
 
 struct ht_enum {                // typedefed to ht_enum_t in ht.h for external scope
@@ -37,6 +44,39 @@ struct ht_enum {                // typedefed to ht_enum_t in ht.h for external s
     size_t idx;
 };
 
+/**
+ * __random_seed:
+ *      Generate a random hash offset for hashing.
+ */
+static void __random_seed(ht_t *ht)
+{
+#if defined(CPU_32_BIT)
+    uint32_t seed;
+    seed = (uint32_t)time(NULL);
+    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
+    seed ^= (uint32_t)&ht;
+#elif defined(CPU_64_BIT)
+    uint64_t seed;
+    seed = (uint64_t)time(NULL);
+    seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
+    seed ^= (uint64_t)&ht;
+#endif
+    ht->seed = seed;
+}
+
+/**
+ * __default_seed:
+ *      Use a default hash offset for FNV1A hashing algorithm.
+ */
+static void __default_seed(ht_t *ht)
+{
+#if defined(CPU_32_BIT)
+#define FNV1A_OFFSET (0x811C9DC5) // 2166136261 (32 bit)
+#elif defined(CPU_64_BIT)
+#define FNV1A_OFFSET (0xCBF29CE484222325) // 14695981039346656037 (64 bit)
+#endif
+    ht->seed = FNV1A_OFFSET;
+}
 /**
  * __ht_passthrough_copy:
  *      Default copy callback.
@@ -61,7 +101,7 @@ static void __ht_passthrough_destroy(void *v)
  */
 static size_t __ht_bucket_index(ht_t *ht, void *key)
 {
-    return ht->hfunc(key) % ht->capacity;
+    return ht->hfunc(key, ht->seed) % ht->capacity;
 }
 
 /**
@@ -183,9 +223,9 @@ static void __ht_rehash(ht_t *ht)
  *      Create a new hash table of INITIAL_CAPACITY, it requires a hash function, a key equality
  *      comparison function, and optionally bucket operations function callbacks structure.
  */
-ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks_t *callbacks)
+ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks_t *callbacks, unsigned int flags)
 {
-    ht_t *ht;
+    ht_t *ht = NULL;
 
     if (!hfunc || !keyeq)
         return NULL;
@@ -221,6 +261,11 @@ ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks_t *callbacks)
         perror("ht_create");
         return NULL;
     }
+
+    if (flags & HT_SEED_RANDOM)
+        __random_seed(ht);
+    else
+        __default_seed(ht);
 
     return ht;
 }

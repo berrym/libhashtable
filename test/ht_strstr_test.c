@@ -8,13 +8,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "ht.h"                 // for HT_SEED_RANDOM
 #include "ht_strstr.h"
 
 int main(int argc, char **argv)
 {
     ht_strstr_t *ht = NULL;
     ht_strstr_enum_t *he = NULL;
-    const char *a = "xyz";
+    const char *a = "apple";
     const char *b = NULL;
     size_t len = 20;
     char t1[64] = { '\0' };

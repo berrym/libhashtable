@@ -10,30 +10,22 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <time.h>
 #include "ht.h"
 #include "ht_strstr.h"
 
 #if defined(CPU_32_BIT)
 
-#define FNV1A_OFFSET (0x811C9DC5) // 2166136261 (32 bit)
 #define FNV1A_PRIME (0x01000193)  // 16777619 (32 bit)
 
 /**
  * __fnv1a_hash_str_int:
  *      Return a hash using the 32 bit FNV1A algorithm.
  */
-static uint32_t __fnv1a_hash_str_int(const void *key, bool ignore_case, bool random_seed)
+static uint32_t __fnv1a_hash_str_int(const void *key, uint32_t seed, bool ignore_case)
 {
     uint32_t h, c;
 
-    if (random_seed) {
-        h = (uint64_t)time(NULL);
-        h ^= ((uint64_t)ht_create << 32) | (uint64_t)&h;
-        h ^= (uint64_t)&h;
-    } else {
-        h = FNV1A_OFFSET;
-    }
+    h = seed;
 
     for (unsigned char *p = (unsigned char *)key; *p; p++) {
         c = (uint32_t)(*p);
@@ -50,57 +42,33 @@ static uint32_t __fnv1a_hash_str_int(const void *key, bool ignore_case, bool ran
  * __fnv1a_hash_str:
  *      Wrapper around __fnv1a_hash_str_int that uses case sensitive keys.
  */
-static uint32_t __fnv1a_hash_str(const void *key)
+static uint32_t __fnv1a_hash_str(const void *key, uint32_t seed)
 {
-    return __fnv1a_hash_str_int(key, false, false);
+    return __fnv1a_hash_str_int(key, seed, false);
 }
 
 /**
  * __fnv1a_hash_str:
  *      Wrapper around __fnv1a_hash_str_int that uses case sensitive keys.
  */
-static uint32_t __fnv1a_hash_str_casecmp(const void *key)
+static uint32_t __fnv1a_hash_str_casecmp(const void *key, uint32_t seed)
 {
-    return __fnv1a_hash_str_int(key, true, false);
-}
-/**
- * __fnv1a_hash_str_random:
- *      Wrapper around __fnv1a_hash_str_int that uses case sensitive keys and a random seed.
- */
-static uint32_t __fnv1a_hash_str_random(const void *key)
-{
-    return __fnv1a_hash_str_int(key, false, true);
-}
-
-/**
- * __fnv1a_hash_str_casecmp_random:
- *      Wrapper around __fnv1a_hash_str_int that uses case insensitive keys and a random seed.
- */
-static uint32_t __fnv1a_hash_str_casecmp_random(const void *key)
-{
-    return __fnv1a_hash_str_int(key, true, true);
+    return __fnv1a_hash_str_int(key, seed, true);
 }
 
 #elif defined(CPU_64_BIT)
 
-#define FNV1A_OFFSET (0xCBF29CE484222325) // 14695981039346656037 (64 bit)
 #define FNV1A_PRIME (0x00000100000001B3)  // 1099511628211 (64 bit)
 
 /**
  * __fnv1a_hash_str_int:
  *      Return a hash using the 64 bit FNV1A algorithm.
  */
-static uint64_t __fnv1a_hash_str_int(const void *key, bool ignore_case, bool random_seed)
+static uint64_t __fnv1a_hash_str_int(const void *key, uint64_t seed, bool ignore_case)
 {
     uint64_t h, c;
 
-    if (random_seed) {
-        h = (uint64_t)time(NULL);
-        h ^= ((uint64_t)ht_create << 32) | (uint64_t)&h;
-        h ^= (uint64_t)&h;
-    } else {
-        h = FNV1A_OFFSET;
-    }
+    h = seed;
 
     for (unsigned char *p = (unsigned char *)key; *p; p++) {
         c = (uint64_t)(*p);
@@ -117,36 +85,18 @@ static uint64_t __fnv1a_hash_str_int(const void *key, bool ignore_case, bool ran
  * __fnv1a_hash_str:
  *      Wrapper around __fnv1a_hash_str_int that uses case sensitive keys.
  */
-static uint64_t __fnv1a_hash_str(const void *key)
+static uint64_t __fnv1a_hash_str(const void *key, uint64_t seed)
 {
-    return __fnv1a_hash_str_int(key, false, false);
+    return __fnv1a_hash_str_int(key, seed, false);
 }
 
 /**
  * __fnv1a_hash_str_casecmp:
  *      Wrapper around __fnv1a_hash_str_int that uses case insensitive keys.
  */
-static uint64_t __fnv1a_hash_str_casecmp(const void *key)
+static uint64_t __fnv1a_hash_str_casecmp(const void *key, uint64_t seed)
 {
-    return __fnv1a_hash_str_int(key, true, false);
-}
-
-/**
- * __fnv1a_hash_str_random:
- *      Wrapper around __fnv1a_hash_str_int that uses case sensitive keys and a random seed.
- */
-static uint64_t __fnv1a_hash_str_random(const void *key)
-{
-    return __fnv1a_hash_str_int(key, false, true);
-}
-
-/**
- * __fnv1a_hash_str_casecmp_random:
- *      Wrapper around __fnv1a_hash_str_int that uses case insensitive keys and a random seed.
- */
-static uint64_t __fnv1a_hash_str_casecmp_random(const void *key)
-{
-    return __fnv1a_hash_str_int(key, true, true);
+    return __fnv1a_hash_str_int(key, seed, true);
 }
 
 #endif
@@ -176,8 +126,6 @@ static bool __ht_str_caseeq(const void *a, const void *b)
 ht_strstr_t *ht_strstr_create(unsigned int flags)
 {
     ht_hash hash = __fnv1a_hash_str;
-    if (flags & HT_SEED_RANDOM)
-        hash = __fnv1a_hash_str_random;
     ht_keyeq keyeq = __ht_str_eq;
     ht_callbacks_t callbacks = {
         (void *(*)(void *))strdup,
@@ -187,14 +135,11 @@ ht_strstr_t *ht_strstr_create(unsigned int flags)
     };
 
     if (flags & HT_STR_CASECMP) {
-        if (flags & HT_SEED_RANDOM)
-            hash = __fnv1a_hash_str_casecmp_random;
-        else
-            hash = __fnv1a_hash_str_casecmp;
+        hash = __fnv1a_hash_str_casecmp;
         keyeq = __ht_str_caseeq;
     }
 
-    return (ht_strstr_t *)ht_create(hash, keyeq, &callbacks);
+    return (ht_strstr_t *)ht_create(hash, keyeq, &callbacks, flags);
 }
 
 /**

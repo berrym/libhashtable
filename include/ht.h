@@ -15,10 +15,14 @@
 typedef struct ht ht_t;
 typedef struct ht_enum ht_enum_t;
 
+typedef enum {
+    HT_SEED_RANDOM = 2,
+} ht_flags_enum_t;
+
 #if defined(CPU_32_BIT)
-typedef uint32_t (*ht_hash)(const void *);
+typedef uint32_t (*ht_hash)(const void *, uint32_t);
 #elif defined(CPU_64_BIT)
-typedef uint64_t (*ht_hash)(const void *);
+typedef uint64_t (*ht_hash)(const void *, uint64_t);
 #endif
 typedef bool (*ht_keyeq)(const void *, const void *);
 typedef void *(*ht_kcopy)(void *);
@@ -34,7 +38,7 @@ typedef struct {
 } ht_callbacks_t;
 
 // Creation and destruction
-ht_t *ht_create(ht_hash, ht_keyeq, ht_callbacks_t *);
+ht_t *ht_create(ht_hash, ht_keyeq, ht_callbacks_t *, unsigned int);
 void ht_destroy(ht_t *);
 
 // Insertion and removal
