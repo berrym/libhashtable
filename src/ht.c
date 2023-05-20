@@ -77,6 +77,7 @@ static void __default_seed(ht_t *ht)
 #endif
     ht->seed = FNV1A_OFFSET;
 }
+
 /**
  * __ht_passthrough_copy:
  *      Default copy callback.
