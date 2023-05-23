@@ -98,7 +98,7 @@ static uint64_t __fnv1a_hash_str(const void *key, uint64_t seed)
  */
 static uint64_t __fnv1a_hash_str_casecmp(const void *key, uint64_t seed)
 {
-    return __fnv1a_hash_str_int(key, seed, false);
+    return __fnv1a_hash_str_int(key, seed, true);
 }
 
 #endif
