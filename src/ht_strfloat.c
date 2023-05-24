@@ -138,7 +138,7 @@ static float *__floatdup(float *val)
 
 /**
  * ht_strfloat_create:
- *      Wrapper aroung ht_create that creates a string->int hash table.
+ *      Wrapper aroung ht_create that creates a string->float hash table.
  */
 ht_strfloat_t *ht_strfloat_create(unsigned int flags)
 {
@@ -161,7 +161,7 @@ ht_strfloat_t *ht_strfloat_create(unsigned int flags)
 
 /**
  * ht_strfloat_destroy:
- *      Wrapper around ht_destroy that destroys a string->int hash table.
+ *      Wrapper around ht_destroy that destroys a string->float hash table.
  */
 void ht_strfloat_destroy(ht_strfloat_t *ht)
 {
@@ -170,7 +170,7 @@ void ht_strfloat_destroy(ht_strfloat_t *ht)
 
 /**
  * ht_strfloat_insert:
- *      Wrapper around ht_insert that inserts a string->int key value pair into a hash table.
+ *      Wrapper around ht_insert that inserts a string->float key value pair into a hash table.
  */
 void ht_strfloat_insert(ht_strfloat_t *ht, const char *key, const float *val)
 {
@@ -179,7 +179,7 @@ void ht_strfloat_insert(ht_strfloat_t *ht, const char *key, const float *val)
 
 /**
  * ht_strfloat_remove:
- *      Wrapper around ht_remove that removes a bucket from a string->int hash table.
+ *      Wrapper around ht_remove that removes a bucket from a string->float hash table.
  */
 void ht_strfloat_remove(ht_strfloat_t *ht, const char *key)
 {
@@ -188,7 +188,7 @@ void ht_strfloat_remove(ht_strfloat_t *ht, const char *key)
 
 /**
  * ht_strfloat_get:
- *      Wrapper around ht_get for string->int hash table.
+ *      Wrapper around ht_get for string->float hash table.
  */
 bool ht_strfloat_get(ht_strfloat_t *ht, const char *key, const float **val)
 {
@@ -197,7 +197,7 @@ bool ht_strfloat_get(ht_strfloat_t *ht, const char *key, const float **val)
 
 /**
  * ht_strfloat_get_direct:
- *      Wrapper around ht_get_direct for string->int hash table.
+ *      Wrapper around ht_get_direct for string->float hash table.
  */
 void *ht_strfloat_get_direct(ht_strfloat_t *ht, const char *key)
 {
@@ -206,7 +206,7 @@ void *ht_strfloat_get_direct(ht_strfloat_t *ht, const char *key)
 
 /**
  * ht_strfloat_enum_create:
- *      Wrapper around ht_enum_create the makes an enumeration object for string->int hash table.
+ *      Wrapper around ht_enum_create the makes an enumeration object for string->float hash table.
  */
 ht_strfloat_enum_t *ht_strfloat_enum_create(ht_strfloat_t *ht)
 {
@@ -215,7 +215,7 @@ ht_strfloat_enum_t *ht_strfloat_enum_create(ht_strfloat_t *ht)
 
 /**
  * ht_strfloat_enum_next:
- *      Wrapper around ht_enum_next that returns the next bucket contents of a string->int hash table.
+ *      Wrapper around ht_enum_next that returns the next bucket contents of a string->float hash table.
  */
 bool ht_strfloat_enum_next(ht_strfloat_enum_t *he, const char **key, const float **val)
 {
@@ -224,7 +224,7 @@ bool ht_strfloat_enum_next(ht_strfloat_enum_t *he, const char **key, const float
 
 /**
  * ht_strfloat_enum_destroy:
- *      Wrapper around ht_enum_destroy that destroys a string->int hash table enumeration object.
+ *      Wrapper around ht_enum_destroy that destroys a string->float hash table enumeration object.
  */
 void ht_strfloat_enum_destroy(ht_strfloat_enum_t *he)
 {
