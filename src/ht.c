@@ -6,12 +6,12 @@
  * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
  */
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
 #include "ht.h"
+#include "ht_fnv1a.h"
 
 #define INITIAL_BUCKETS (16)    // Initial table size
 #define MAX_LOAD_FACTOR (0.75)  // Capacity point at which a table needs to grow and rehash
@@ -70,11 +70,6 @@ static void __random_seed(ht_t *ht)
  */
 static void __default_seed(ht_t *ht)
 {
-#if defined(CPU_32_BIT)
-#define FNV1A_OFFSET (0x811C9DC5) // 2166136261 (32 bit)
-#elif defined(CPU_64_BIT)
-#define FNV1A_OFFSET (0xCBF29CE484222325) // 14695981039346656037 (64 bit)
-#endif
     ht->seed = FNV1A_OFFSET;
 }
 
