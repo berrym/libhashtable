@@ -105,7 +105,7 @@ static size_t __ht_bucket_index(ht_t *ht, void *key)
  *      Fill a bucket with a key and value.  If it's a rehash of a known key
  *      do not allocate new memory, just overwrite what's there.
  */
-static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
+static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
 {
     ht_bucket_t *cur = NULL, *prev = NULL;
     size_t idx;
@@ -113,7 +113,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
     idx = __ht_bucket_index(ht, key);
 
     if (!ht->buckets[idx].key) {
-        if (!isrehash) {
+        if (!rehash) {
             key = ht->callbacks.key_copy(key);
 
             if (val)
@@ -123,7 +123,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
         ht->buckets[idx].key = key;
         ht->buckets[idx].val = val;
 
-        if (!isrehash)
+        if (!rehash)
             ht->length++;
     } else {
         prev = ht->buckets + idx;
@@ -134,7 +134,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
                 if (cur->val)
                     ht->callbacks.val_free(cur->val);
 
-                if (!isrehash && val)
+                if (!rehash && val)
                     val = ht->callbacks.val_copy(val);
 
                 cur->val = val;
@@ -153,7 +153,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
                 return;
             }
 
-            if (!isrehash) {
+            if (!rehash) {
                 key = ht->callbacks.key_copy(key);
 
                 if (val)
@@ -164,7 +164,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool isrehash)
             cur->val = val;
             prev->next = cur;
 
-            if (!isrehash)
+            if (!rehash)
                 ht->length++;
         }
     }
