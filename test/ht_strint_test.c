@@ -32,6 +32,8 @@ int main(int argc, char **argv)
     b = ht_strint_get_direct(ht, "Abc");
     printf("%d: %p, %p\n", *((int *)b), a, b);
 
+    ht_strint_remove(ht, "abC");
+
     size_t len = 20;
     char a_key[64] = { '\0' };
     int a_val = 0;

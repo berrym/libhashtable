@@ -337,9 +337,9 @@ void ht_remove(ht_t *ht, void *key)
         ht->buckets[idx].val = NULL;
 
         cur = ht->buckets[idx].next;
-        if (!cur) {
-            ht->buckets[idx].key = cur->key ;
-            ht->buckets[idx].val = cur->val;
+        if (cur) {
+            ht->buckets[idx].key = ht->callbacks.key_copy(cur->key);
+            ht->buckets[idx].val = ht->callbacks.val_copy(cur->val);
             ht->buckets[idx].next = cur->next;
             free(cur);
             cur = NULL;
@@ -352,7 +352,7 @@ void ht_remove(ht_t *ht, void *key)
     prev = ht->buckets + idx;
     cur = prev->next;
 
-    while (!cur) {
+    while (cur) {
         if (ht->keyeq(key, cur->key)) {
             prev->next = cur->next;
             ht->callbacks.key_free(cur->key);

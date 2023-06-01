@@ -33,6 +33,8 @@ int main(int argc, char **argv)
     b = ht_strstr_get_direct(ht, "Abc");
     printf("%s: %p, %p\n", b, a, b);
 
+    ht_strstr_remove(ht, "abC");
+
     for (size_t i = 0; i < len; i++) {
         snprintf(t1, sizeof(t1), "a%zu", i);
         snprintf(t2, sizeof(t2), "%zu", (i * 100) + i + (i / 2));

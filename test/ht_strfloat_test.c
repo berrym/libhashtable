@@ -32,6 +32,8 @@ int main(int argc, char **argv)
     b = ht_strfloat_get_direct(ht, "Abc");
     printf("%f: %p, %p\n", *((float *)b), a, b);
 
+    ht_strfloat_remove(ht, "abC");
+
     size_t len = 20;
     char a_key[64] = { '\0' };
     float a_val = 0;

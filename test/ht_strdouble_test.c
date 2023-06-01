@@ -32,6 +32,8 @@ int main(int argc, char **argv)
     b = ht_strdouble_get_direct(ht, "Abc");
     printf("%lf: %p, %p\n", *((double *)b), a, b);
 
+    ht_strdouble_remove(ht, "abC");
+
     size_t len = 20;
     char a_key[64] = { '\0' };
     double a_val = 0;
