@@ -341,6 +341,10 @@ void ht_remove(ht_t *ht, void *key)
             ht->buckets[idx].key = ht->callbacks.key_copy(cur->key);
             ht->buckets[idx].val = ht->callbacks.val_copy(cur->val);
             ht->buckets[idx].next = cur->next;
+            ht->callbacks.key_free(cur->key);
+            ht->callbacks.val_free(cur->val);
+            cur->key = NULL;
+            cur->val = NULL;
             free(cur);
             cur = NULL;
         }
@@ -357,6 +361,8 @@ void ht_remove(ht_t *ht, void *key)
             prev->next = cur->next;
             ht->callbacks.key_free(cur->key);
             ht->callbacks.val_free(cur->val);
+            cur->key = NULL;
+            cur->val = NULL;
             free(cur);
             cur = NULL;
             ht->length--;
