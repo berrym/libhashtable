@@ -376,7 +376,7 @@ void ht_remove(ht_t *ht, void *key)
 
 /**
  * ht_get:
- *      Get a table bucket given it's key and value.
+ *      Get a table bucket given it's key and a pointer to store it's value.
  */
 bool ht_get(ht_t *ht, void *key, void **val)
 {
