@@ -12,6 +12,10 @@
 #ifndef __HT_H__
 #define __HT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ht ht_t;
 typedef struct ht_enum ht_enum_t;
 
@@ -51,7 +55,11 @@ void *ht_get_direct(ht_t *, void *);
 
 // Enumeration
 ht_enum_t *ht_enum_create(ht_t *);
-bool ht_enum_next(ht_enum_t*, void **, void **);
-void ht_enum_destroy(ht_enum_t*);
+bool ht_enum_next(ht_enum_t *, void **, void **);
+void ht_enum_destroy(ht_enum_t *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_H__

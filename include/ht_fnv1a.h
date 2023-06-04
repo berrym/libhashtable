@@ -11,6 +11,10 @@
 #ifndef __HT_FNV1A_H__
 #define __HT_FNV1A_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CPU_32_BIT)
 
 #define FNV1A_PRIME (0x01000193)  // 16777619 (32 bit)
@@ -32,4 +36,8 @@ uint64_t fnv1a_hash_str_casecmp(const void *, uint64_t);
 bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_FNV1A_H__

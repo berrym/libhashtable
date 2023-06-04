@@ -11,6 +11,10 @@
 #ifndef __HT_STRDOUBLE_H__
 #define __HT_STRDOUBLE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ht_strdouble ht_strdouble_t;
 typedef struct ht_strdouble_enum ht_strdouble_enum_t;
 
@@ -36,4 +40,8 @@ ht_strdouble_enum_t *ht_strdouble_enum_create(ht_strdouble_t *);
 bool ht_strdouble_enum_next(ht_strdouble_enum_t *, const char **, const double **);
 void ht_strdouble_enum_destroy(ht_strdouble_enum_t *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_STRDOUBLE_H__

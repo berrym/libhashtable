@@ -11,6 +11,10 @@
 #ifndef __HT_STRFLOAT_H__
 #define __HT_STRFLOAT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ht_strfloat ht_strfloat_t;
 typedef struct ht_strfloat_enum ht_strfloat_enum_t;
 
@@ -36,4 +40,8 @@ ht_strfloat_enum_t *ht_strfloat_enum_create(ht_strfloat_t *);
 bool ht_strfloat_enum_next(ht_strfloat_enum_t *, const char **, const float **);
 void ht_strfloat_enum_destroy(ht_strfloat_enum_t *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_STRFLOAT_H__

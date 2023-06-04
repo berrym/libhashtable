@@ -11,6 +11,10 @@
 #ifndef __HT_STRINT_H__
 #define __HT_STRINT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ht_strint ht_strint_t;
 typedef struct ht_strint_enum ht_strint_enum_t;
 
@@ -36,4 +40,8 @@ ht_strint_enum_t *ht_strint_enum_create(ht_strint_t *);
 bool ht_strint_enum_next(ht_strint_enum_t *, const char **, const int **);
 void ht_strint_enum_destroy(ht_strint_enum_t *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_STRINT_H__

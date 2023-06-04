@@ -11,6 +11,10 @@
 #ifndef __HT_STRSTR_H__
 #define __HT_STRSTR_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ht_strstr ht_strstr_t;
 typedef struct ht_strstr_enum ht_strstr_enum_t;
 
@@ -36,4 +40,8 @@ ht_strstr_enum_t *ht_strstr_enum_create(ht_strstr_t *);
 bool ht_strstr_enum_next(ht_strstr_enum_t *, const char **, const char **);
 void ht_strstr_enum_destroy(ht_strstr_enum_t *);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif  // __HT_STRSTR_H__
