@@ -277,18 +277,20 @@ void ht_destroy(ht_t *ht)
     if (!ht)
         return;
 
-    for (size_t i = 0; i < ht->capacity; i++) {
-        if (!ht->buckets[i].key)
+    for (size_t idx = 0; idx < ht->capacity; idx++) {
+        if (!ht->buckets[idx].key)
             continue;
 
-        ht->callbacks.key_free(ht->buckets[i].key);
-        ht->callbacks.val_free(ht->buckets[i].val);
+        ht->callbacks.key_free(ht->buckets[idx].key);
+        if (ht->buckets[idx].val)
+            ht->callbacks.val_free(ht->buckets[idx].val);
 
-        next = ht->buckets[i].next;
+        next = ht->buckets[idx].next;
         while (next) {
             cur = next;
             ht->callbacks.key_free(cur->key);
-            ht->callbacks.val_free(cur->val);
+            if (cur->val)
+                ht->callbacks.val_free(cur->val);
             next = cur->next;
             free(cur);
             cur = NULL;
@@ -332,14 +334,16 @@ void ht_remove(ht_t *ht, void *key)
 
     if (ht->keyeq(ht->buckets[idx].key, key)) {
         ht->callbacks.key_free(ht->buckets[idx].key);
-        ht->callbacks.val_free(ht->buckets[idx].val);
+        if (ht->buckets[idx].val)
+            ht->callbacks.val_free(ht->buckets[idx].val);
         ht->buckets[idx].key = NULL;
         ht->buckets[idx].val = NULL;
 
         cur = ht->buckets[idx].next;
         if (cur) {
             ht->buckets[idx].key = ht->callbacks.key_copy(cur->key);
-            ht->buckets[idx].val = ht->callbacks.val_copy(cur->val);
+            if (cur->val)
+                ht->buckets[idx].val = ht->callbacks.val_copy(cur->val);
             ht->buckets[idx].next = cur->next;
             ht->callbacks.key_free(cur->key);
             ht->callbacks.val_free(cur->val);
@@ -360,7 +364,8 @@ void ht_remove(ht_t *ht, void *key)
         if (ht->keyeq(key, cur->key)) {
             prev->next = cur->next;
             ht->callbacks.key_free(cur->key);
-            ht->callbacks.val_free(cur->val);
+            if (cur->val)
+                ht->callbacks.val_free(cur->val);
             cur->key = NULL;
             cur->val = NULL;
             free(cur);
