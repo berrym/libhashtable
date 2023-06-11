@@ -5,7 +5,7 @@ libhashtable_sources = ['ht.c',
                         'ht_strdouble.c',
                         'ht_fnv1a.c']
 
-libhashtable = library('libhashtable',
+libhashtable = library('hashtable',
                        libhashtable_sources,
                        include_directories : inc,
                        install : true)
