@@ -204,11 +204,6 @@ static void __ht_rehash(ht_t *ht)
             do {
                 __ht_add_to_bucket(ht, cur->key, cur->val, true);
                 next = cur->next;
-                ht->callbacks.key_free(cur->key);
-                if (cur->val)
-                    ht->callbacks.val_free(cur->val);
-                cur->key = NULL;
-                cur->val = NULL;
                 free(cur);
                 cur = next;
             } while (cur);
