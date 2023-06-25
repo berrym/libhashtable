@@ -82,18 +82,9 @@ void ht_strfloat_remove(ht_strfloat_t *ht, const char *key)
  * ht_strfloat_get:
  *      Wrapper around ht_get for string->float hash table.
  */
-bool ht_strfloat_get(ht_strfloat_t *ht, const char *key, const float **val)
+void *ht_strfloat_get(ht_strfloat_t *ht, const char *key)
 {
-    return ht_get((ht_t *)ht, (void *)key, (void **)val);
-}
-
-/**
- * ht_strfloat_get_direct:
- *      Wrapper around ht_get_direct for string->float hash table.
- */
-void *ht_strfloat_get_direct(ht_strfloat_t *ht, const char *key)
-{
-    return ht_get_direct((ht_t *)ht, (void *)key);
+    return ht_get((ht_t *)ht, (void *)key);
 }
 
 /**

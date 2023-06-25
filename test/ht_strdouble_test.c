@@ -24,12 +24,12 @@ int main(int argc, char **argv)
     const double *b;
 
     ht_strdouble_insert(ht, "Abc", a);
-    b = ht_strdouble_get_direct(ht, "Abc");
+    b = ht_strdouble_get(ht, "Abc");
     printf("%lf: %p, %p\n", *((double *)b), a, b);
 
     i = 456.789;
     ht_strdouble_insert(ht, "aBc", a);
-    b = ht_strdouble_get_direct(ht, "Abc");
+    b = ht_strdouble_get(ht, "Abc");
     printf("%lf: %p, %p\n", *((double *)b), a, b);
 
     ht_strdouble_remove(ht, "abC");

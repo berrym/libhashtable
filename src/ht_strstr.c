@@ -66,18 +66,9 @@ void ht_strstr_remove(ht_strstr_t *ht, const char *key)
  * ht_strstr_get:
  *      Wrapper around ht_get for string->string hash table.
  */
-bool ht_strstr_get(ht_strstr_t *ht, const char *key, const char **val)
+const char *ht_strstr_get(ht_strstr_t *ht, const char *key)
 {
-    return ht_get((ht_t *)ht, (void *)key, (void **)val);
-}
-
-/**
- * ht_strstr_get_direct:
- *      Wrapper around ht_get_direct for string->string hash table.
- */
-const char *ht_strstr_get_direct(ht_strstr_t *ht, const char *key)
-{
-    return ht_get_direct((ht_t *)ht, (void *)key);
+    return ht_get((ht_t *)ht, (void *)key);
 }
 
 /**

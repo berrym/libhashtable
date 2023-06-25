@@ -24,12 +24,12 @@ int main(int argc, char **argv)
     const int *b;
 
     ht_strint_insert(ht, "Abc", a);
-    b = ht_strint_get_direct(ht, "Abc");
+    b = ht_strint_get(ht, "Abc");
     printf("%d: %p, %p\n", *((int *)b), a, b);
 
     i = 456;
     ht_strint_insert(ht, "aBc", a);
-    b = ht_strint_get_direct(ht, "Abc");
+    b = ht_strint_get(ht, "Abc");
     printf("%d: %p, %p\n", *((int *)b), a, b);
 
     ht_strint_remove(ht, "abC");

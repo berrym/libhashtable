@@ -24,12 +24,12 @@ int main(int argc, char **argv)
     const float *b;
 
     ht_strfloat_insert(ht, "Abc", a);
-    b = ht_strfloat_get_direct(ht, "Abc");
+    b = ht_strfloat_get(ht, "Abc");
     printf("%f: %p, %p\n", *((float *)b), a, b);
 
     i = 456.789;
     ht_strfloat_insert(ht, "aBc", a);
-    b = ht_strfloat_get_direct(ht, "Abc");
+    b = ht_strfloat_get(ht, "Abc");
     printf("%f: %p, %p\n", *((float *)b), a, b);
 
     ht_strfloat_remove(ht, "abC");

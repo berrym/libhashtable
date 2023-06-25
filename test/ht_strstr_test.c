@@ -26,11 +26,11 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
 
     ht_strstr_insert(ht, "Abc", a);
-    b = ht_strstr_get_direct(ht, "Abc");
+    b = ht_strstr_get(ht, "Abc");
     printf("%s: %p, %p\n", b, a, b);
 
     ht_strstr_insert(ht, "aBc", "orange");
-    b = ht_strstr_get_direct(ht, "Abc");
+    b = ht_strstr_get(ht, "Abc");
     printf("%s: %p, %p\n", b, a, b);
 
     ht_strstr_remove(ht, "abC");

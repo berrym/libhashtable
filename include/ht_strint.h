@@ -32,8 +32,7 @@ void ht_strint_insert(ht_strint_t *, const char *, const int *);
 void ht_strint_remove(ht_strint_t *, const char *);
 
 // Getting
-bool ht_strint_get(ht_strint_t *, const char *, const int **);
-void *ht_strint_get_direct(ht_strint_t *, const char *);
+void *ht_strint_get(ht_strint_t *, const char *);
 
 // Enumeration
 ht_strint_enum_t *ht_strint_enum_create(ht_strint_t *);

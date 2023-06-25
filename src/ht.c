@@ -16,7 +16,7 @@
 #define INITIAL_BUCKETS (16)    // Initial table size
 #define MAX_LOAD_FACTOR (0.75)  // Capacity point at which a table needs to grow and rehash
 #define MAX_CAPACITY (1 << 31)  // Maximum capacity of table when it should not grow and rehash (2147483648)
-#define GROWTH_FACTOR (2)       // Factor by which a tables capacity should grow by
+#define GROWTH_FACTOR (2)       // Factor by which a table's capacity should grow
 
 typedef struct ht_bucket {
     void *key;
@@ -46,7 +46,7 @@ struct ht_enum {                // typedefed to ht_enum_t in ht.h for external s
 
 /**
  * __random_seed:
- *      Generate a random hash offset for hashing.
+ *      Generate a random hash offset.
  */
 static void __random_seed(ht_t *ht)
 {
@@ -66,7 +66,7 @@ static void __random_seed(ht_t *ht)
 
 /**
  * __default_seed:
- *      Use a default hash offset for FNV1A hashing algorithm.
+ *      Use a default hash offset for FNV1A algorithm.
  */
 static void __default_seed(ht_t *ht)
 {
@@ -102,8 +102,22 @@ static size_t __ht_bucket_index(ht_t *ht, void *key)
 
 /**
  * __ht_add_to_bucket:
- *      Fill a bucket with a key and value.  If it's a rehash of a known key
- *      do not allocate new memory, just overwrite what's there.
+ *      Fill a bucket with a key and value.
+ *      If part of a rehash operation do not make copies of the key value pair.
+ *      Case 1:
+ *            Check if the index of the bucket has something already.
+ *            If not then we add the key and value to the bucket.
+ *
+ *       Case 2:
+ *            Second, if that index already has a key value pair,
+ *            check if the key is a match and if so replace the value.
+ *
+ *       Case 3:
+ *             We’ve determined the key isn’t in a bucket,
+ *             but there is something already at that index.
+ *             Traverse the chain checking each node if we have the key already.
+ *             If yes, replace the value and we’re done.
+ *             If not we’ll hit the end and create a new node to add to the chain.
  */
 static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
 {
@@ -319,6 +333,14 @@ void ht_insert(ht_t *ht, void *key, void *val)
 /**
  * ht_remove:
  *      Remove a bucket from the table.
+ *      Step 1:
+ *            Get the bucket index using it's hash.
+ *      Step 2:
+ *            Check the bucket and chains for a key match.
+ *      Step 3:
+ *            Remove the entry if match is made.
+ *      Step 4:
+ *            Relink the chain if necessary.
  */
 void ht_remove(ht_t *ht, void *key)
 {
@@ -355,6 +377,7 @@ void ht_remove(ht_t *ht, void *key)
         }
 
         ht->length--;
+
         return;
     }
 
@@ -381,10 +404,10 @@ void ht_remove(ht_t *ht, void *key)
 }
 
 /**
- * ht_get:
- *      Get a table bucket given it's key and a pointer to store it's value.
+ * __ht_get:
+ *      Get a table bucket value given it's key and a pointer to store it's value.
  */
-bool ht_get(ht_t *ht, void *key, void **val)
+static bool __ht_get(ht_t *ht, void *key, void **val)
 {
     ht_bucket_t *cur = NULL;
     size_t idx;
@@ -410,13 +433,13 @@ bool ht_get(ht_t *ht, void *key, void **val)
 }
 
 /**
- * ht_get_direct:
- *      Get a table bucket given it's key.
+ * ht_get:
+ *      Get a table bucket value given it's key. It's a wrapper around __ht_get.
  */
-void *ht_get_direct(ht_t *ht, void *key)
+void *ht_get(ht_t *ht, void *key)
 {
     void *val = NULL;
-    ht_get(ht, key, &val);
+    __ht_get(ht, key, &val);
     return val;
 }
 
@@ -444,6 +467,17 @@ ht_enum_t *ht_enum_create(ht_t *ht)
 /**
  * ht_enum_next:
  *      Get the key value information of the next bucket in a table.
+ *      Step 1:
+ *            Iterate through each bucket and if something is there,
+ *            return the bucket data.
+ *      Step 2:
+ *            Move to the next bucket unlese the bucket has a chain,
+ *            then we store the head of the chain in cur.
+ *            The next time around we’ll see cur and keep traversing the
+ *            chain until it's done.
+ *      Step 4:
+ *            Once we’ve gone though that chain we’re already pointed to
+ *            the next bucket and we start over.
  */
 bool ht_enum_next(ht_enum_t *he, void **key, void **val)
 {
@@ -477,7 +511,7 @@ bool ht_enum_next(ht_enum_t *he, void **key, void **val)
 }
 
 /**
- * ht_enum_destory:
+ * ht_enum_destroy:
  *      Destroy an enumeration object.
  */
 void ht_enum_destroy(ht_enum_t *he)

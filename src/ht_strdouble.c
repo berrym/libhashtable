@@ -82,18 +82,9 @@ void ht_strdouble_remove(ht_strdouble_t *ht, const char *key)
  * ht_strdouble_get:
  *      Wrapper around ht_get for string->double hash table.
  */
-bool ht_strdouble_get(ht_strdouble_t *ht, const char *key, const double **val)
+void *ht_strdouble_get(ht_strdouble_t *ht, const char *key)
 {
-    return ht_get((ht_t *)ht, (void *)key, (void **)val);
-}
-
-/**
- * ht_strdouble_get_direct:
- *      Wrapper around ht_get_direct for string->double hash table.
- */
-void *ht_strdouble_get_direct(ht_strdouble_t *ht, const char *key)
-{
-    return ht_get_direct((ht_t *)ht, (void *)key);
+    return ht_get((ht_t *)ht, (void *)key);
 }
 
 /**

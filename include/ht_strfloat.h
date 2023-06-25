@@ -32,8 +32,7 @@ void ht_strfloat_insert(ht_strfloat_t *, const char *, const float *);
 void ht_strfloat_remove(ht_strfloat_t *, const char *);
 
 // Getting
-bool ht_strfloat_get(ht_strfloat_t *, const char *, const float **);
-void *ht_strfloat_get_direct(ht_strfloat_t *, const char *);
+void *ht_strfloat_get(ht_strfloat_t *, const char *);
 
 // Enumeration
 ht_strfloat_enum_t *ht_strfloat_enum_create(ht_strfloat_t *);

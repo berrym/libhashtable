@@ -82,18 +82,9 @@ void ht_strint_remove(ht_strint_t *ht, const char *key)
  * ht_strint_get:
  *      Wrapper around ht_get for string->int hash table.
  */
-bool ht_strint_get(ht_strint_t *ht, const char *key, const int **val)
+void *ht_strint_get(ht_strint_t *ht, const char *key)
 {
-    return ht_get((ht_t *)ht, (void *)key, (void **)val);
-}
-
-/**
- * ht_strint_get_direct:
- *      Wrapper around ht_get_direct for string->int hash table.
- */
-void *ht_strint_get_direct(ht_strint_t *ht, const char *key)
-{
-    return ht_get_direct((ht_t *)ht, (void *)key);
+    return ht_get((ht_t *)ht, (void *)key);
 }
 
 /**

@@ -50,8 +50,7 @@ void ht_insert(ht_t *, void *, void *);
 void ht_remove(ht_t *, void *);
 
 // Getting
-bool ht_get(ht_t *, void *, void **);
-void *ht_get_direct(ht_t *, void *);
+void *ht_get(ht_t *, void *);
 
 // Enumeration
 ht_enum_t *ht_enum_create(ht_t *);

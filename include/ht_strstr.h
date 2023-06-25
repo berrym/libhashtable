@@ -32,8 +32,7 @@ void ht_strstr_insert(ht_strstr_t *, const char *, const char *);
 void ht_strstr_remove(ht_strstr_t *, const char *);
 
 // Getting
-bool ht_strstr_get(ht_strstr_t *, const char *, const char **);
-const char *ht_strstr_get_direct(ht_strstr_t *, const char *);
+const char *ht_strstr_get(ht_strstr_t *, const char *);
 
 // Enumeration
 ht_strstr_enum_t *ht_strstr_enum_create(ht_strstr_t *);

@@ -32,8 +32,7 @@ void ht_strdouble_insert(ht_strdouble_t *, const char *, const double *);
 void ht_strdouble_remove(ht_strdouble_t *, const char *);
 
 // Getting
-bool ht_strdouble_get(ht_strdouble_t *, const char *, const double **);
-void *ht_strdouble_get_direct(ht_strdouble_t *, const char *);
+void *ht_strdouble_get(ht_strdouble_t *, const char *);
 
 // Enumeration
 ht_strdouble_enum_t *ht_strdouble_enum_create(ht_strdouble_t *);
