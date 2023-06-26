@@ -8,8 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "ht.h"                 // for HT_SEED_RANDOM
-#include "ht_strfloat.h"
+#include "ht.h"
 
 int main(int argc, char **argv)
 {
@@ -44,7 +43,7 @@ int main(int argc, char **argv)
         ht_strfloat_insert(ht, a_key, &a_val);
     }
 
-    ht_strfloat_enum_t *he = NULL;
+    ht_enum_t *he = NULL;
 
     he = ht_strfloat_enum_create(ht);
     if (!he) {

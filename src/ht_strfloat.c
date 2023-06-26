@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ht.h"
-#include "ht_strfloat.h"
-#include "ht_fnv1a.h"
 
 /**
  * __floatdup:
@@ -91,25 +89,25 @@ void *ht_strfloat_get(ht_strfloat_t *ht, const char *key)
  * ht_strfloat_enum_create:
  *      Wrapper around ht_enum_create the makes an enumeration object for string->float hash table.
  */
-ht_strfloat_enum_t *ht_strfloat_enum_create(ht_strfloat_t *ht)
+ht_enum_t *ht_strfloat_enum_create(ht_strfloat_t *ht)
 {
-    return (ht_strfloat_enum_t *)ht_enum_create((ht_t *)ht);
+    return ht_enum_create((ht_t *)ht);
 }
 
 /**
  * ht_strfloat_enum_next:
  *      Wrapper around ht_enum_next that returns the next bucket contents of a string->float hash table.
  */
-bool ht_strfloat_enum_next(ht_strfloat_enum_t *he, const char **key, const float **val)
+bool ht_strfloat_enum_next(ht_enum_t *he, const char **key, const float **val)
 {
-    return ht_enum_next((ht_enum_t *)he, (void **)key, (void **)val);
+    return ht_enum_next(he, (void **)key, (void **)val);
 }
 
 /**
  * ht_strfloat_enum_destroy:
  *      Wrapper around ht_enum_destroy that destroys a string->float hash table enumeration object.
  */
-void ht_strfloat_enum_destroy(ht_strfloat_enum_t *he)
+void ht_strfloat_enum_destroy(ht_enum_t *he)
 {
-    ht_enum_destroy((ht_enum_t *)he);
+    ht_enum_destroy(he);
 }

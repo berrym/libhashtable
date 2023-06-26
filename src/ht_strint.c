@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ht.h"
-#include "ht_strint.h"
-#include "ht_fnv1a.h"
 
 /**
  * __intdup:
@@ -91,25 +89,25 @@ void *ht_strint_get(ht_strint_t *ht, const char *key)
  * ht_strint_enum_create:
  *      Wrapper around ht_enum_create the makes an enumeration object for string->int hash table.
  */
-ht_strint_enum_t *ht_strint_enum_create(ht_strint_t *ht)
+ht_enum_t *ht_strint_enum_create(ht_strint_t *ht)
 {
-    return (ht_strint_enum_t *)ht_enum_create((ht_t *)ht);
+    return ht_enum_create((ht_t *)ht);
 }
 
 /**
  * ht_strint_enum_next:
  *      Wrapper around ht_enum_next that returns the next bucket contents of a string->int hash table.
  */
-bool ht_strint_enum_next(ht_strint_enum_t *he, const char **key, const int **val)
+bool ht_strint_enum_next(ht_enum_t *he, const char **key, const int **val)
 {
-    return ht_enum_next((ht_enum_t *)he, (void **)key, (void **)val);
+    return ht_enum_next(he, (void **)key, (void **)val);
 }
 
 /**
  * ht_strint_enum_destroy:
  *      Wrapper around ht_enum_destroy that destroys a string->int hash table enumeration object.
  */
-void ht_strint_enum_destroy(ht_strint_enum_t *he)
+void ht_strint_enum_destroy(ht_enum_t *he)
 {
-    ht_enum_destroy((ht_enum_t *)he);
+    ht_enum_destroy(he);
 }

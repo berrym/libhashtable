@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <time.h>
 #include "ht.h"
-#include "ht_fnv1a.h"
 
 #define INITIAL_BUCKETS (16)    // Initial table size
 #define MAX_LOAD_FACTOR (0.75)  // Capacity point at which a table needs to grow and rehash
@@ -53,7 +52,7 @@ static void __random_seed(ht_t *ht)
 #if defined(CPU_32_BIT)
     uint32_t seed;
     seed = (uint32_t)time(NULL);
-    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
+    seed ^= ((uint3g2_t)ht_create << 16) | (uint32_t)&ht;
     seed ^= (uint32_t)&ht;
 #elif defined(CPU_64_BIT)
     uint64_t seed;

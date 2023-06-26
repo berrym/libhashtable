@@ -9,8 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ht.h"
-#include "ht_strstr.h"
-#include "ht_fnv1a.h"
 
 /**
  * ht_strstr_create:
@@ -75,16 +73,16 @@ const char *ht_strstr_get(ht_strstr_t *ht, const char *key)
  * ht_strstr_enum_create:
  *      Wrapper around ht_enum_create the makes an enumeration object for string->string hash table.
  */
-ht_strstr_enum_t *ht_strstr_enum_create(ht_strstr_t *ht)
+ht_enum_t *ht_strstr_enum_create(ht_strstr_t *ht)
 {
-    return (ht_strstr_enum_t *)ht_enum_create((ht_t *)ht);
+    return (ht_enum_t *)ht_enum_create((ht_t *)ht);
 }
 
 /**
  * ht_strtr_enum_next:
  *      Wrapper around ht_enum_next that returns the next bucket contents of a string->string hash table.
  */
-bool ht_strstr_enum_next(ht_strstr_enum_t *he, const char **key, const char **val)
+bool ht_strstr_enum_next(ht_enum_t *he, const char **key, const char **val)
 {
     return ht_enum_next((ht_enum_t *)he, (void **)key, (void **)val);
 }
@@ -93,7 +91,7 @@ bool ht_strstr_enum_next(ht_strstr_enum_t *he, const char **key, const char **va
  * ht_strstr_enum_destroy:
  *      Wrapper around ht_enum_destroy that destroys a string->string hash table enumeration object.
  */
-void ht_strstr_enum_destroy(ht_strstr_enum_t *he)
+void ht_strstr_enum_destroy(ht_enum_t *he)
 {
     ht_enum_destroy((ht_enum_t *)he);
 }

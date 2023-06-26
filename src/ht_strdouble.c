@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ht.h"
-#include "ht_strdouble.h"
-#include "ht_fnv1a.h"
 
 /**
  * __doubledup:
@@ -91,25 +89,25 @@ void *ht_strdouble_get(ht_strdouble_t *ht, const char *key)
  * ht_strdouble_enum_create:
  *      Wrapper around ht_enum_create the makes an enumeration object for string->double hash table.
  */
-ht_strdouble_enum_t *ht_strdouble_enum_create(ht_strdouble_t *ht)
+ht_enum_t *ht_strdouble_enum_create(ht_strdouble_t *ht)
 {
-    return (ht_strdouble_enum_t *)ht_enum_create((ht_t *)ht);
+    return ht_enum_create((ht_t *)ht);
 }
 
 /**
  * ht_strdouble_enum_next:
  *      Wrapper around ht_enum_next that returns the next bucket contents of a string->double hash table.
  */
-bool ht_strdouble_enum_next(ht_strdouble_enum_t *he, const char **key, const double **val)
+bool ht_strdouble_enum_next(ht_enum_t *he, const char **key, const double **val)
 {
-    return ht_enum_next((ht_enum_t *)he, (void **)key, (void **)val);
+    return ht_enum_next(he, (void **)key, (void **)val);
 }
 
 /**
  * ht_strdouble_enum_destroy:
  *      Wrapper around ht_enum_destroy that destroys a string->double hash table enumeration object.
  */
-void ht_strdouble_enum_destroy(ht_strdouble_enum_t *he)
+void ht_strdouble_enum_destroy(ht_enum_t *he)
 {
-    ht_enum_destroy((ht_enum_t *)he);
+    ht_enum_destroy(he);
 }

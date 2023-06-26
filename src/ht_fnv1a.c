@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include "ht_fnv1a.h"
+#include "ht.h"
 
 #if defined(CPU_32_BIT)
 
