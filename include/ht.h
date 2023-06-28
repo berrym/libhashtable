@@ -6,11 +6,11 @@
  * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
  */
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #ifndef __HT_H__
 #define __HT_H__
+
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
