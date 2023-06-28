@@ -29,7 +29,7 @@ struct ht {                     // typedefed to ht_t in ht.h for external scope
     ht_callbacks_t callbacks;
     ht_bucket_t *buckets;
     size_t capacity;
-    size_t length;
+    size_t used_buckets;
 #if defined(CPU_32_BIT)
     uint32_t seed;
 #elif defined(CPU_64_BIT)
@@ -137,7 +137,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
         ht->buckets[idx].val = val;
 
         if (!rehash)
-            ht->length++;
+            ht->used_buckets++;
     } else {
         prev = ht->buckets + idx;
         cur  = ht->buckets + idx;
@@ -178,7 +178,7 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
             prev->next = cur;
 
             if (!rehash)
-                ht->length++;
+                ht->used_buckets++;
         }
     }
 }
@@ -193,7 +193,7 @@ static void __ht_rehash(ht_t *ht)
     ht_bucket_t *buckets = NULL, *cur = NULL, *next = NULL;
     size_t capacity;
 
-    if (ht->length + 1 < (size_t)(ht->capacity * MAX_LOAD_FACTOR) || ht->capacity >= MAX_CAPACITY)
+    if (ht->used_buckets + 1 < (size_t)(ht->capacity * MAX_LOAD_FACTOR) || ht->capacity >= MAX_CAPACITY)
         return;
 
     capacity = ht->capacity;
@@ -375,7 +375,7 @@ void ht_remove(ht_t *ht, void *key)
             cur = NULL;
         }
 
-        ht->length--;
+        ht->used_buckets--;
 
         return;
     }
@@ -393,7 +393,7 @@ void ht_remove(ht_t *ht, void *key)
             cur->val = NULL;
             free(cur);
             cur = NULL;
-            ht->length--;
+            ht->used_buckets--;
             break;
         }
 
