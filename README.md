@@ -16,14 +16,14 @@ Build:
 
 For modern meson users:
 
-* meson setup builddir
-* cd builddir
+* meson setup buildDir
+* cd buildDir
 * meson compile
 
 For legacy meson users:
 
-* meson setup builddir
-* cd builddir
+* meson setup buildDir
+* cd buildDir
 * meson ninja
 
 The build instructions have been tested on Fedora Workstation 38 and recent Ubuntu.
@@ -32,12 +32,15 @@ The build instructions have been tested on Fedora Workstation 38 and recent Ubun
 
 The test programs can be found and executed from the build directory, e.g.
 
-* builddir/test/test_name_exe
+* buildDir/test/test_name_exe
+
+## Version
+
+v0.6.1 - stable release
 
 ## Authors
 
-Copyright 2023
-Michael Berry <trismegustis@gmail.com>
+Copyright 2024 Michael Berry <trismegustis@gmail.com>
 
 ## License
 
