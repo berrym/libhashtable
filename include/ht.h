@@ -35,10 +35,10 @@ typedef uint32_t (*ht_hash)(const void *, uint32_t);
 typedef uint64_t (*ht_hash)(const void *, uint64_t);
 #endif
 typedef bool (*ht_keyeq)(const void *, const void *);
-typedef void *(*ht_kcopy)(void *);
-typedef void (*ht_kfree)(void *);
-typedef void *(*ht_vcopy)(void *);
-typedef void (*ht_vfree)(void *);
+typedef void *(*ht_kcopy)(const void *);
+typedef void (*ht_kfree)(const void *);
+typedef void *(*ht_vcopy)(const void *);
+typedef void (*ht_vfree)(const void *);
 
 typedef struct {
     ht_kcopy key_copy;
@@ -64,7 +64,7 @@ bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
 
 // Creation and destruction
-ht_t *ht_create(ht_hash, ht_keyeq, ht_callbacks_t *, unsigned int);
+ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_callbacks_t *, const unsigned int);
 void ht_destroy(ht_t *);
 ht_strdouble_t *ht_strdouble_create(unsigned int);
 void ht_strdouble_destroy(ht_strdouble_t *);
@@ -76,8 +76,8 @@ ht_strstr_t *ht_strstr_create(unsigned int);
 void ht_strstr_destroy(ht_strstr_t *);
 
 // Insertion and removal
-void ht_insert(ht_t *, void *, void *);
-void ht_remove(ht_t *, void *);
+void ht_insert(ht_t *, const void *, const void *);
+void ht_remove(ht_t *, const void *);
 void ht_strdouble_insert(ht_strdouble_t *, const char *, const double *);
 void ht_strdouble_remove(ht_strdouble_t *, const char *);
 void ht_strfloat_insert(ht_strfloat_t *, const char *, const float *);
@@ -88,7 +88,7 @@ void ht_strstr_insert(ht_strstr_t *, const char *, const char *);
 void ht_strstr_remove(ht_strstr_t *, const char *);
 
 // Getting
-void *ht_get(ht_t *, void *);
+void *ht_get(const ht_t *, const void *);
 void *ht_strdouble_get(ht_strdouble_t *, const char *);
 void *ht_strfloat_get(ht_strfloat_t *, const char *);
 void *ht_strint_get(ht_strint_t *, const char *);
@@ -96,7 +96,7 @@ const char *ht_strstr_get(ht_strstr_t *, const char *);
 
 // Enumeration
 ht_enum_t *ht_enum_create(ht_t *);
-bool ht_enum_next(ht_enum_t *, void **, void **);
+bool ht_enum_next(ht_enum_t *, const void **, const void **);
 void ht_enum_destroy(ht_enum_t *);
 ht_enum_t *ht_strdouble_enum_create(ht_strdouble_t *);
 bool ht_strdouble_enum_next(ht_enum_t *, const char **, const double **);

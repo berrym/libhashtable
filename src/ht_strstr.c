@@ -18,11 +18,11 @@ ht_strstr_t *ht_strstr_create(unsigned int flags)
 {
     ht_hash hash = fnv1a_hash_str;
     ht_keyeq keyeq = str_eq;
-    ht_callbacks_t callbacks = {
-        (void *(*)(void *))strdup,
-        free,
-        (void *(*)(void *))strdup,
-        free
+    const ht_callbacks_t callbacks = {
+        (void *(*)(const void *))strdup,
+        (void (*)(const void *))free,
+        (void *(*)(const void *))strdup,
+        (void (*)(const void *))free
     };
 
     if (flags & HT_STR_CASECMP) {
@@ -48,7 +48,7 @@ void ht_strstr_destroy(ht_strstr_t *ht)
  */
 void ht_strstr_insert(ht_strstr_t *ht, const char *key, const char *val)
 {
-    ht_insert((ht_t *)ht, (void *)key, (void *)val);
+    ht_insert((ht_t *)ht, key, val);
 }
 
 /**
@@ -84,7 +84,7 @@ ht_enum_t *ht_strstr_enum_create(ht_strstr_t *ht)
  */
 bool ht_strstr_enum_next(ht_enum_t *he, const char **key, const char **val)
 {
-    return ht_enum_next((ht_enum_t *)he, (void **)key, (void **)val);
+    return ht_enum_next((ht_enum_t *)he, (const void **)key, (const void **)val);
 }
 
 /**

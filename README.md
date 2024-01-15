@@ -16,7 +16,6 @@ Build:
 
 For modern meson users:
 
-* meson setup buildDir
 * cd buildDir
 * meson compile
 
@@ -26,7 +25,6 @@ For legacy meson users:
 * cd buildDir
 * meson ninja
 
-The build instructions have been tested on Fedora Workstation 38 and recent Ubuntu.
 
 ## Executing program
 

@@ -15,7 +15,7 @@
  * __intdup:
  *      Create a pointer duplicating val.
  */
-static int *__intdup(int *val)
+static int *__intdup(const int *val)
 {
     int *i = calloc(1, sizeof(int));
     if (!i) {
@@ -34,11 +34,11 @@ ht_strint_t *ht_strint_create(unsigned int flags)
 {
     ht_hash hash = fnv1a_hash_str;
     ht_keyeq keyeq = str_eq;
-    ht_callbacks_t callbacks = {
-        (void *(*)(void *))strdup,
-        free,
-        (void *(*)(void *))__intdup,
-        free
+    const ht_callbacks_t callbacks = {
+        (void *(*)(const void *))strdup,
+        (void (*)(const void *))free,
+        (void *(*)(const void *))__intdup,
+        (void (*)(const void *))free
     };
 
     if (flags & HT_STR_CASECMP) {
@@ -100,7 +100,7 @@ ht_enum_t *ht_strint_enum_create(ht_strint_t *ht)
  */
 bool ht_strint_enum_next(ht_enum_t *he, const char **key, const int **val)
 {
-    return ht_enum_next(he, (void **)key, (void **)val);
+    return ht_enum_next(he, (const void **)key, (const void **)val);
 }
 
 /**

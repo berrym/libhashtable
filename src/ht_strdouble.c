@@ -15,7 +15,7 @@
  * __doubledup:
  *      Create a pointer duplicating val.
  */
-static double *__doubledup(double *val)
+static double *__doubledup(const double *val)
 {
     double *d = calloc(1, sizeof(double));
     if (!d) {
@@ -34,11 +34,11 @@ ht_strdouble_t *ht_strdouble_create(unsigned int flags)
 {
     ht_hash hash = fnv1a_hash_str;
     ht_keyeq keyeq = str_eq;
-    ht_callbacks_t callbacks = {
-        (void *(*)(void *))strdup,
-        free,
-        (void *(*)(void *))__doubledup,
-        free
+    const ht_callbacks_t callbacks = {
+        (void *(*)(const void *))strdup,
+        (void (*)(const void *))free,
+        (void *(*)(const void *))__doubledup,
+        (void (*)(const void *))free
     };
 
     if (flags & HT_STR_CASECMP) {
@@ -100,7 +100,7 @@ ht_enum_t *ht_strdouble_enum_create(ht_strdouble_t *ht)
  */
 bool ht_strdouble_enum_next(ht_enum_t *he, const char **key, const double **val)
 {
-    return ht_enum_next(he, (void **)key, (void **)val);
+    return ht_enum_next(he, (const void **)key, (const void **)val);
 }
 
 /**

@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     ht_enum_t *he = NULL;
     const char *a = "apple";
     const char *b = NULL;
-    size_t len = 20;
+    const size_t len = 20;
     char t1[64] = { '\0' };
     char t2[64] = { '\0' };
 

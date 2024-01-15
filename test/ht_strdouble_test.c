@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
     ht_strdouble_remove(ht, "abC");
 
-    size_t len = 20;
+    const size_t len = 20;
     char a_key[64] = { '\0' };
     double a_val = 0;
 

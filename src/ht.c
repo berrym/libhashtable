@@ -17,8 +17,8 @@
 #define GROWTH_FACTOR (2)       // Factor by which a table's capacity should grow
 
 typedef struct ht_bucket {
-    void *key;
-    void *val;
+    const void *key;
+    const void *val;
     struct ht_bucket *next;
 } ht_bucket_t;
 
@@ -49,13 +49,11 @@ struct ht_enum {                // typedefed to ht_enum_t in ht.h for external s
 static void __random_seed(ht_t *ht)
 {
 #if defined(CPU_32_BIT)
-    uint32_t seed;
-    seed = (uint32_t)time(NULL);
-    seed ^= ((uint3g2_t)ht_create << 16) | (uint32_t)&ht;
+    uint32_t seed = (uint32_t)time(NULL);
+    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
     seed ^= (uint32_t)&ht;
 #elif defined(CPU_64_BIT)
-    uint64_t seed;
-    seed = (uint64_t)time(NULL);
+    uint64_t seed = (uint64_t)time(NULL);
     seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
     seed ^= (uint64_t)&ht;
 #endif
@@ -93,7 +91,7 @@ static void __ht_passthrough_destroy(void *v)
  * __ht_bucket_index:
  *      Return the table index of a bucket given it's key.
  */
-static size_t __ht_bucket_index(ht_t *ht, void *key)
+static size_t __ht_bucket_index(const ht_t *ht, const void *key)
 {
     return ht->hfunc(key, ht->seed) % ht->capacity;
 }
@@ -117,12 +115,10 @@ static size_t __ht_bucket_index(ht_t *ht, void *key)
  *             If yes, replace the value and we’re done.
  *             If not we’ll hit the end and create a new node to add to the chain.
  */
-static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
+static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val, bool rehash)
 {
     ht_bucket_t *cur = NULL, *prev = NULL;
-    size_t idx;
-
-    idx = __ht_bucket_index(ht, key);
+    const size_t idx = __ht_bucket_index(ht, key);
 
     if (!ht->buckets[idx].key) {
         if (!rehash) {
@@ -138,7 +134,6 @@ static void __ht_add_to_bucket(ht_t *ht, void *key, void *val, bool rehash)
         if (!rehash)
             ht->used_buckets++;
     } else {
-        prev = ht->buckets + idx;
         cur  = ht->buckets + idx;
 
         do {
@@ -231,7 +226,7 @@ static void __ht_rehash(ht_t *ht)
  *      Create a new hash table of INITIAL_CAPACITY, it requires a hash function, a key equality
  *      comparison function, and optionally bucket operations function callbacks structure.
  */
-ht_t *ht_create(ht_hash hfunc, ht_keyeq keyeq, ht_callbacks_t *callbacks, unsigned int flags)
+ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq, const ht_callbacks_t *callbacks, const unsigned int flags)
 {
     ht_t *ht = NULL;
 
@@ -319,7 +314,7 @@ void ht_destroy(ht_t *ht)
  * ht_insert:
  *      Insert a key value pair into a table bucket.
  */
-void ht_insert(ht_t *ht, void *key, void *val)
+void ht_insert(ht_t *ht, const void *key, const void *val)
 {
     if (!ht || !key)
         return;
@@ -340,15 +335,14 @@ void ht_insert(ht_t *ht, void *key, void *val)
  *      Step 4:
  *            Relink the chain if necessary.
  */
-void ht_remove(ht_t *ht, void *key)
+void ht_remove(ht_t *ht, const void *key)
 {
-    ht_bucket_t *cur = NULL, *prev = NULL;
-    size_t idx;
-
     if (!ht || !key)
         return;
 
-    idx = __ht_bucket_index(ht, key);
+    ht_bucket_t *cur = NULL, *prev = NULL;
+    const size_t idx = __ht_bucket_index(ht, key);;
+
     if (!ht->buckets[idx].key)
         return;
 
@@ -405,23 +399,21 @@ void ht_remove(ht_t *ht, void *key)
  * __ht_get:
  *      Get a table bucket value given it's key and a pointer to store it's value.
  */
-static bool __ht_get(ht_t *ht, void *key, void **val)
+static bool __ht_get(const ht_t *ht, const void *key, const void **val)
 {
-    ht_bucket_t *cur = NULL;
-    size_t idx;
-
     if (!ht || !key)
         return false;
 
-    idx = __ht_bucket_index(ht, key);
+    const ht_bucket_t *cur = NULL;
+    const size_t idx = __ht_bucket_index(ht, key);
+
     if (!ht->buckets[idx].key)
         return false;
 
     cur = ht->buckets + idx;
     while (cur) {
         if (ht->keyeq(key, cur->key)) {
-            if (val)
-                *val = cur->val;
+            *val = cur->val;
             return true;
         }
         cur = cur->next;
@@ -434,7 +426,7 @@ static bool __ht_get(ht_t *ht, void *key, void **val)
  * ht_get:
  *      Get a table bucket value given it's key. It's a wrapper around __ht_get.
  */
-void *ht_get(ht_t *ht, void *key)
+void *ht_get(const ht_t *ht, const void *key)
 {
     void *val = NULL;
     __ht_get(ht, key, &val);
@@ -477,9 +469,9 @@ ht_enum_t *ht_enum_create(ht_t *ht)
  *            Once we’ve gone though that chain we’re already pointed to
  *            the next bucket and we start over.
  */
-bool ht_enum_next(ht_enum_t *he, void **key, void **val)
+bool ht_enum_next(ht_enum_t *he, const void **key, const void **val)
 {
-    void *mykey = NULL, *myval = NULL;
+    const void *mykey = NULL, *myval = NULL;
 
     if (!he || he->idx >= he->ht->capacity)
         return false;

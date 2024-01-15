@@ -15,7 +15,7 @@
  * __floatdup:
  *      Create a pointer duplicating val.
  */
-static float *__floatdup(float *val)
+static float *__floatdup(const float *val)
 {
     float *f = calloc(1, sizeof(float));
     if (!f) {
@@ -34,11 +34,11 @@ ht_strfloat_t *ht_strfloat_create(unsigned int flags)
 {
     ht_hash hash = fnv1a_hash_str;
     ht_keyeq keyeq = str_eq;
-    ht_callbacks_t callbacks = {
-        (void *(*)(void *))strdup,
-        free,
-        (void *(*)(void *))__floatdup,
-        free
+    const ht_callbacks_t callbacks = {
+        (void *(*)(const void *))strdup,
+        (void (*)(const void *))free,
+        (void *(*)(const void *))__floatdup,
+        (void (*)(const void *))free
     };
 
     if (flags & HT_STR_CASECMP) {
@@ -100,7 +100,7 @@ ht_enum_t *ht_strfloat_enum_create(ht_strfloat_t *ht)
  */
 bool ht_strfloat_enum_next(ht_enum_t *he, const char **key, const float **val)
 {
-    return ht_enum_next(he, (void **)key, (void **)val);
+    return ht_enum_next(he, (const void **)key, (const void **)val);
 }
 
 /**
