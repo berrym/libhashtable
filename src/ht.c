@@ -73,7 +73,7 @@ static void __default_seed(ht_t *ht)
  * __ht_passthrough_copy:
  *      Default copy callback.
  */
-static void *__ht_passthrough_copy(void *v)
+static void *__ht_passthrough_copy(const void *v)
 {
     return v;
 }
@@ -82,7 +82,7 @@ static void *__ht_passthrough_copy(void *v)
  * __ht_passthrough_destroy:
  *      Default destroy callback.
  */
-static void __ht_passthrough_destroy(void *v)
+static void __ht_passthrough_destroy(const void *v)
 {
     return;
 }
@@ -399,7 +399,7 @@ void ht_remove(ht_t *ht, const void *key)
  * __ht_get:
  *      Get a table bucket value given it's key and a pointer to store it's value.
  */
-static bool __ht_get(const ht_t *ht, const void *key, const void **val)
+static bool __ht_get(const ht_t *ht, const void *key, void **val)
 {
     if (!ht || !key)
         return false;
@@ -413,7 +413,7 @@ static bool __ht_get(const ht_t *ht, const void *key, const void **val)
     cur = ht->buckets + idx;
     while (cur) {
         if (ht->keyeq(key, cur->key)) {
-            *val = cur->val;
+            *val = (void *)cur->val;
             return true;
         }
         cur = cur->next;
