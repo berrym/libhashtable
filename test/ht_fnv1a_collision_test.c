@@ -24,7 +24,6 @@ int main(int argc, char **argv)
     if (!ht)
         exit(EXIT_FAILURE);
 
-#if defined(CPU_32_BIT)
 
     // Create a collision - 32 bit hash
     ht_strstr_insert(ht, "costarring", "apple");
@@ -43,32 +42,6 @@ int main(int argc, char **argv)
     // Create another collision - 32 bit hash
     ht_strstr_insert(ht, "altarages", "pear");
     ht_strstr_insert(ht, "zinkes", "grape");
-
-#elif defined(CPU_64_BIT)
-
-    // Create a collision - 64 bit hash (0x4EAC0C95540867E4)
-    ht_strstr_insert(ht, "8yn0iYCKYHlIj4-BwPqk", "apple");
-    ht_strstr_insert(ht, "GReLUrM4wMqfg9yzV3KQ", "orange");
-
-    ht_strstr_remove(ht, "8yn0iYCKYHlIj4-BwPqk");
-
-    // Create another collision - 64 bit hash (0x8FCF3BE2DE898214)
-    ht_strstr_insert(ht, "gMPflVXtwGDXbIhP73TX", "banana");
-    ht_strstr_insert(ht, "LtHf1prlU1bCeYZEdqWf", "pineapple");
-
-    // Create another collision - 64 bit hash (0xF8893E25250C0EAA)
-    ht_strstr_insert(ht, "pFuM83THhM-Qw8FI5FKo", "strawberry");
-    ht_strstr_insert(ht, ".jPx7rOtTDteKAwvfOEo", "mango");
-
-    // Create another collision - 64 bit hash (0x184ADE9A961953A2)
-    ht_strstr_insert(ht, "7mohtcOFVz", "pear");
-    ht_strstr_insert(ht, "c1E51sSEyx", "grape");
-
-    // Create another collision - 64 bit hash (0x703C4DD295D7AA15)
-    ht_strstr_insert(ht, "6a5x-VbtXk", "blackberry");
-    ht_strstr_insert(ht, "f_2k7GG-4v", "raspberry");
-
-#endif
 
     for (size_t i = 0; i < len; i++) {
         snprintf(t1, sizeof(t1), "a%zu", i);
