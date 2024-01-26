@@ -29,11 +29,7 @@ struct ht {                     // typedefed to ht_t in ht.h for external scope
     ht_bucket_t *buckets;
     size_t capacity;
     size_t used_buckets;
-#if defined(CPU_32_BIT)
-    uint32_t seed;
-#elif defined(CPU_64_BIT)
     uint64_t seed;
-#endif
 };
 
 struct ht_enum {                // typedefed to ht_enum_t in ht.h for external scope
@@ -48,15 +44,9 @@ struct ht_enum {                // typedefed to ht_enum_t in ht.h for external s
  */
 static void __random_seed(ht_t *ht)
 {
-#if defined(CPU_32_BIT)
-    uint32_t seed = (uint32_t)time(NULL);
-    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
-    seed ^= (uint32_t)&ht;
-#elif defined(CPU_64_BIT)
     uint64_t seed = (uint64_t)time(NULL);
     seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
     seed ^= (uint64_t)&ht;
-#endif
     ht->seed = seed;
 }
 
