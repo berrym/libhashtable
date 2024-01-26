@@ -1,37 +1,37 @@
 project('libhashtable', 'c',
         default_options: 'c_std=c99',
-        version: '0.6.4',
+        version: '0.6.5',
         license: 'MIT')
 
-if host_machine.cpu_family() == 'x86'
+if build_machine.cpu_family() == 'x86'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'x86_64'
+elif build_machine.cpu_family() == 'x86_64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'aarch64'
+elif build_machine.cpu_family() == 'aarch64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'arc'
+elif build_machine.cpu_family() == 'arc'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'arm'
+elif build_machine.cpu_family() == 'arm'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'ia64'
+elif build_machine.cpu_family() == 'ia64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'loongarch64'
+elif build_machine.cpu_family() == 'loongarch64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'mips'
+elif build_machine.cpu_family() == 'mips'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'mips64'
+elif build_machine.cpu_family() == 'mips64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'ppc'
+elif build_machine.cpu_family() == 'ppc'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'ppc64'
+elif build_machine.cpu_family() == 'ppc64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'sparc'
+elif build_machine.cpu_family() == 'sparc'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'sparc64'
+elif build_machine.cpu_family() == 'sparc64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif host_machine.cpu_family() == 'wasm32'
+elif build_machine.cpu_family() == 'wasm32'
   add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif host_machine.cpu_family() == 'wasm64'
+elif build_machine.cpu_family() == 'wasm64'
   add_project_arguments('-DCPU_64_BIT', language: 'c')
 endif
 
