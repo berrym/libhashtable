@@ -47,3 +47,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![build result](https://build.opensuse.org/projects/home:berrym/packages/libhashtable-devel/badge.svg?type=default)](https://build.opensuse.org/package/show/home:berrym/libhashtable-devel)
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/mberry/libhashtable-devel/package/libhashtable-devel/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/mberry/libhashtable-devel/package/libhashtable-devel/)
