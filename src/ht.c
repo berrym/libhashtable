@@ -65,7 +65,7 @@ static void __default_seed(ht_t *ht)
  */
 static void *__ht_passthrough_copy(const void *v)
 {
-    return v;
+    return (void *)v;
 }
 
 /**
