@@ -3,7 +3,7 @@
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
  * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
+ * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
 #include <ctype.h>
@@ -52,7 +52,7 @@ uint32_t fnv1a_hash_str_casecmp(const void *key, uint32_t seed)
     return __fnv1a_hash(key, seed, true);
 }
 
-#elif defined(CPU_64_BIT)
+#else
 
 /**
  * __fnv1a_hash:

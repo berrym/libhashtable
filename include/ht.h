@@ -3,7 +3,7 @@
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
  * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
+ * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
 #ifndef __HT_H__
@@ -31,7 +31,7 @@ typedef enum {
 
 #if defined(CPU_32_BIT)
 typedef uint32_t (*ht_hash)(const void *, uint32_t);
-#elif defined(CPU_64_BIT)
+#else
 typedef uint64_t (*ht_hash)(const void *, uint64_t);
 #endif
 typedef bool (*ht_keyeq)(const void *, const void *);
@@ -52,7 +52,7 @@ typedef struct {
 #define FNV1A_OFFSET (0x811C9DC5) // 2166136261 (32 bit)
 uint32_t fnv1a_hash_str(const void *, uint32_t);
 uint32_t fnv1a_hash_str_casecmp(const void *, uint32_t);
-#elif defined(CPU_64_BIT)
+#else
 #define FNV1A_PRIME (0x00000100000001B3)  // 1099511628211 (64 bit)
 #define FNV1A_OFFSET (0xCBF29CE484222325) // 14695981039346656037 (64 bit)
 uint64_t fnv1a_hash_str(const void *, uint64_t);

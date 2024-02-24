@@ -3,7 +3,7 @@
  * Project: libashtable
  * URL: https://github.com/berrym/libhashtable
  * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
+ * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
 #include <stdio.h>

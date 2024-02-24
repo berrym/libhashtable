@@ -1,6 +1,6 @@
 project('libhashtable', 'c',
         default_options: 'c_std=c99',
-        version: '0.6.5',
+        version: '0.6.6',
         license: 'MIT')
 
 if build_machine.cpu_family() == 'x86'

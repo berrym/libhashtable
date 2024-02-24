@@ -3,7 +3,7 @@
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
  * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
+ * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
 #include <stdio.h>
@@ -31,7 +31,7 @@ struct ht {                     // typedefed to ht_t in ht.h for external scope
     size_t used_buckets;
 #if defined(CPU_32_BIT)
     uint32_t seed;
-#elif defined(CPU_64_BIT)
+#else
     uint64_t seed;
 #endif
 };
@@ -52,7 +52,7 @@ static void __random_seed(ht_t *ht)
     uint32_t seed = (uint32_t)time(NULL);
     seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
     seed ^= (uint32_t)&ht;
-#elif defined(CPU_64_BIT)
+#else
     uint64_t seed = (uint64_t)time(NULL);
     seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
     seed ^= (uint64_t)&ht;
@@ -75,7 +75,7 @@ static void __default_seed(ht_t *ht)
  */
 static void *__ht_passthrough_copy(const void *v)
 {
-    return v;
+    return (void *)v;
 }
 
 /**
@@ -109,7 +109,7 @@ static size_t __ht_bucket_index(const ht_t *ht, const void *key)
  *            check if the key is a match and if so replace the value.
  *
  *       Case 3:
- *             We’ve determined the key isn’t in a bucket,
+ *             We've determined the key isn't in a bucket,
  *             but there is something already at that index.
  *             Traverse the chain checking each node if we have the key already.
  *             If yes, replace the value and we’re done.
