@@ -53,7 +53,8 @@ bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
 
 // Creation and destruction
-ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_callbacks_t *, const unsigned int);
+ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_callbacks_t *,
+                const unsigned int);
 void ht_destroy(ht_t *);
 ht_strdouble_t *ht_strdouble_create(unsigned int);
 void ht_strdouble_destroy(ht_strdouble_t *);
@@ -104,4 +105,4 @@ void ht_strstr_enum_destroy(ht_enum_t *);
 }
 #endif
 
-#endif  // __HT_H__
+#endif // __HT_H__

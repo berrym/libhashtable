@@ -6,17 +6,18 @@
  * Copyright (c) Michael Berry <trismegustis@gmail.com> 2023
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "ht.h"
 
-int main(int argc, char **argv)
-{
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv) {
     ht_strint_t *ht = NULL;
 
     ht = ht_strint_create(HT_STR_CASECMP | HT_SEED_RANDOM);
-    if (!ht)
+    if (!ht) {
         exit(EXIT_FAILURE);
+    }
 
     int i = 123;
     const int *a = &i;
@@ -34,7 +35,7 @@ int main(int argc, char **argv)
     ht_strint_remove(ht, "abC");
 
     const size_t len = 20;
-    char a_key[64] = { '\0' };
+    char a_key[64] = {'\0'};
     int a_val = 0;
 
     for (size_t i = 0; i < len; i++) {
@@ -52,8 +53,9 @@ int main(int argc, char **argv)
     }
 
     const char *key = NULL;
-    while (ht_strint_enum_next(he, &key, &b))
+    while (ht_strint_enum_next(he, &key, &b)) {
         printf("key=%s, val=%d\n", key, *((int *)b));
+    }
 
     ht_strint_enum_destroy(he);
     ht_strint_destroy(ht);
