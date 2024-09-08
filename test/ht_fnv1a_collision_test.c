@@ -6,23 +6,24 @@
  * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "ht.h"
 
-int main(int argc, char **argv)
-{
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv) {
     ht_strstr_t *ht = NULL;
     ht_enum_t *he = NULL;
     const char *a = NULL;
     const char *b = NULL;
     const size_t len = 20;
-    char t1[64] = { '\0' };
-    char t2[64] = { '\0' };
+    char t1[64] = {'\0'};
+    char t2[64] = {'\0'};
 
     ht = ht_strstr_create(HT_STR_NONE);
-    if (!ht)
+    if (!ht) {
         exit(EXIT_FAILURE);
+    }
 
 #if defined(CPU_32_BIT)
 
@@ -82,8 +83,9 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    while (ht_strstr_enum_next(he, &a, &b))
+    while (ht_strstr_enum_next(he, &a, &b)) {
         printf("key=%s, val=%s\n", a, b);
+    }
 
     ht_strstr_enum_destroy(he);
     ht_strstr_destroy(ht);

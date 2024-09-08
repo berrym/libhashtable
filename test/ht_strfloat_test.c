@@ -6,17 +6,18 @@
  * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "ht.h"
 
-int main(int argc, char **argv)
-{
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv) {
     ht_strfloat_t *ht = NULL;
 
     ht = ht_strfloat_create(HT_STR_CASECMP | HT_SEED_RANDOM);
-    if (!ht)
+    if (!ht) {
         exit(EXIT_FAILURE);
+    }
 
     float i = 123.456;
     const float *a = &i;
@@ -34,7 +35,7 @@ int main(int argc, char **argv)
     ht_strfloat_remove(ht, "abC");
 
     const size_t len = 20;
-    char a_key[64] = { '\0' };
+    char a_key[64] = {'\0'};
     float a_val = 0;
 
     for (size_t i = 0; i < len; i++) {
@@ -52,8 +53,9 @@ int main(int argc, char **argv)
     }
 
     const char *key = NULL;
-    while (ht_strfloat_enum_next(he, &key, &b))
+    while (ht_strfloat_enum_next(he, &key, &b)) {
         printf("key=%s, val=%f\n", key, *((float *)b));
+    }
 
     ht_strfloat_enum_destroy(he);
     ht_strfloat_destroy(ht);
