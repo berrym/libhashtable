@@ -1,0 +1,5 @@
+option('hash_width',
+       type: 'combo',
+       choices: ['auto', '32', '64'],
+       value: 'auto',
+       description: 'FNV-1a hash width. auto picks 32 or 64 from UINTPTR_MAX.')

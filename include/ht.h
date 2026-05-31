@@ -29,11 +29,36 @@ typedef enum {
     HT_SEED_RANDOM,
 } ht_flags_enum_t;
 
-#if defined(CPU_32_BIT)
-typedef uint32_t (*ht_hash)(const void *, uint32_t);
-#else
-typedef uint64_t (*ht_hash)(const void *, uint64_t);
+/* Hash width: 32 or 64. Override at build time with -DHT_HASH_WIDTH=32|64.
+ * Legacy -DCPU_32_BIT / -DCPU_64_BIT are still recognized. Otherwise the
+ * width is selected from UINTPTR_MAX so the typed wrappers and FNV-1a
+ * constants stay in agreement with the host word size. */
+#if !defined(HT_HASH_WIDTH)
+#  if defined(CPU_32_BIT)
+#    define HT_HASH_WIDTH 32
+#  elif defined(CPU_64_BIT)
+#    define HT_HASH_WIDTH 64
+#  elif UINTPTR_MAX == 0xFFFFFFFFu
+#    define HT_HASH_WIDTH 32
+#  else
+#    define HT_HASH_WIDTH 64
+#  endif
 #endif
+#if HT_HASH_WIDTH != 32 && HT_HASH_WIDTH != 64
+#  error "HT_HASH_WIDTH must be 32 or 64"
+#endif
+
+#if HT_HASH_WIDTH == 32
+typedef uint32_t ht_hash_t;
+#define FNV1A_PRIME (0x01000193u)  ///< 16777619 (32 bit)
+#define FNV1A_OFFSET (0x811C9DC5u) ///< 2166136261 (32 bit)
+#else
+typedef uint64_t ht_hash_t;
+#define FNV1A_PRIME (0x00000100000001B3ull)  ///< 1099511628211 (64 bit)
+#define FNV1A_OFFSET (0xCBF29CE484222325ull) ///< 14695981039346656037 (64 bit)
+#endif
+
+typedef ht_hash_t (*ht_hash)(const void *, ht_hash_t);
 typedef bool (*ht_keyeq)(const void *, const void *);
 typedef void *(*ht_kcopy)(const void *);
 typedef void (*ht_kfree)(const void *);
@@ -47,17 +72,8 @@ typedef struct {
     ht_vfree val_free;
 } ht_callbacks_t;
 
-#if defined(CPU_32_BIT)
-#define FNV1A_PRIME (0x01000193)  // 16777619 (32 bit)
-#define FNV1A_OFFSET (0x811C9DC5) // 2166136261 (32 bit)
-uint32_t fnv1a_hash_str(const void *, uint32_t);
-uint32_t fnv1a_hash_str_casecmp(const void *, uint32_t);
-#else
-#define FNV1A_PRIME (0x00000100000001B3)  // 1099511628211 (64 bit)
-#define FNV1A_OFFSET (0xCBF29CE484222325) // 14695981039346656037 (64 bit)
-uint64_t fnv1a_hash_str(const void *, uint64_t);
-uint64_t fnv1a_hash_str_casecmp(const void *, uint64_t);
-#endif
+ht_hash_t fnv1a_hash_str(const void *, ht_hash_t);
+ht_hash_t fnv1a_hash_str_casecmp(const void *, ht_hash_t);
 
 // String key equality functinos
 bool str_eq(const void *, const void *);

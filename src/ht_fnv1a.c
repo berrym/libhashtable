@@ -11,99 +11,42 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <strings.h>
 
-#if defined(CPU_32_BIT)
+/// Return a hash key using the FNV1A algorithm at the configured
+/// HT_HASH_WIDTH (32 or 64 bit).
+static ht_hash_t __fnv1a_hash(const void *key, ht_hash_t seed,
+                              bool ignore_case) {
+    ht_hash_t h = seed;
 
-/**
- * __fnv1a_hash:
- *      Return a hash key using the 32 bit FNV1A algorithm.
- */
-static uint32_t __fnv1a_hash(const void *key, uint32_t seed, bool ignore_case) {
-    uint32_t h, c;
-
-    h = seed;
-
-    for (unsigned char *p = (unsigned char *)key; *p; p++) {
-        c = (uint32_t)(*p);
+    for (const unsigned char *p = (const unsigned char *)key; *p; p++) {
+        ht_hash_t c = (ht_hash_t)*p;
         if (ignore_case) {
-            c = tolower(c);
+            c = (ht_hash_t)tolower((int)c);
         }
-        h ^= (uint32_t)c;
+        h ^= c;
         h *= FNV1A_PRIME;
     }
 
     return h;
 }
 
-/**
- * fnv1a_hash_str:
- *      Wrapper around __fnv1a_hash that uses case sensitive keys.
- */
-uint32_t fnv1a_hash_str(const void *key, uint32_t seed) {
+/// Wrapper around __fnv1a_hash that uses case sensitive keys.
+ht_hash_t fnv1a_hash_str(const void *key, ht_hash_t seed) {
     return __fnv1a_hash(key, seed, false);
 }
 
-/**
- * fnv1a_hash_str_casecmp:
- *      Wrapper around __fnv1a_hash that uses case insensitive keys.
- */
-uint32_t fnv1a_hash_str_casecmp(const void *key, uint32_t seed) {
+/// Wrapper around __fnv1a_hash that uses case insensitive keys.
+ht_hash_t fnv1a_hash_str_casecmp(const void *key, ht_hash_t seed) {
     return __fnv1a_hash(key, seed, true);
 }
 
-#else
-
-/**
- * __fnv1a_hash:
- *      Return a hash key using the 64 bit FNV1A algorithm.
- */
-static uint64_t __fnv1a_hash(const void *key, uint64_t seed, bool ignore_case) {
-    uint64_t h, c;
-
-    h = seed;
-
-    for (unsigned char *p = (unsigned char *)key; *p; p++) {
-        c = (uint64_t)(*p);
-        if (ignore_case) {
-            c = tolower(c);
-        }
-        h ^= (uint64_t)c;
-        h *= FNV1A_PRIME;
-    }
-
-    return h;
-}
-
-/**
- * fnv1a_hash_str:
- *      Wrapper around __fnv1a_hash that uses case sensitive keys.
- */
-uint64_t fnv1a_hash_str(const void *key, uint64_t seed) {
-    return __fnv1a_hash(key, seed, false);
-}
-
-/**
- * fnv1a_hash_str_casecmp:
- *      Wrapper around __fnv1a_hash that uses case insensitive keys.
- */
-uint64_t fnv1a_hash_str_casecmp(const void *key, uint64_t seed) {
-    return __fnv1a_hash(key, seed, true);
-}
-
-#endif
-
-/**
- * str_eq:
- *      Case sensitive string comparison function.
- */
+/// Case sensitive string comparison function.
 bool str_eq(const void *a, const void *b) {
-    return (strcmp(a, b) == 0) ? true : false;
+    return strcmp(a, b) == 0;
 }
 
-/**
- * str_caseeq:
- *      Case insensitive string comparison function.
- */
+/// Case insensitive string comparison function.
 bool str_caseeq(const void *a, const void *b) {
-    return (strcasecmp(a, b) == 0) ? true : false;
+    return strcasecmp(a, b) == 0;
 }

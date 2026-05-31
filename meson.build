@@ -1,38 +1,14 @@
 project('libhashtable', 'c',
         default_options: 'c_std=c99',
-        version: '0.6.6',
+        version: '0.7.0',
         license: 'MIT')
 
-if build_machine.cpu_family() == 'x86'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'x86_64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'aarch64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'arc'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'arm'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'ia64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'loongarch64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'mips'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'mips64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'ppc'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'ppc64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'sparc'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'sparc64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
-elif build_machine.cpu_family() == 'wasm32'
-  add_project_arguments('-DCPU_32_BIT', language: 'c')
-elif build_machine.cpu_family() == 'wasm64'
-  add_project_arguments('-DCPU_64_BIT', language: 'c')
+# Hash width override. 'auto' lets the header pick from UINTPTR_MAX so the
+# typed wrappers and FNV-1a constants agree with the host word size. Force
+# '32' or '64' for hash-stability or cross-compile test vectors.
+hash_width = get_option('hash_width')
+if hash_width != 'auto'
+  add_project_arguments('-DHT_HASH_WIDTH=' + hash_width, language: 'c')
 endif
 
 add_project_arguments('-D_DEFAULT_SOURCE', language: 'c')

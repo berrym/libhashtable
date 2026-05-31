@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-#if defined(CPU_32_BIT)
+#if HT_HASH_WIDTH == 32
 
     // Create a collision - 32 bit hash
     ht_strstr_insert(ht, "costarring", "apple");
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     ht_strstr_insert(ht, "altarages", "pear");
     ht_strstr_insert(ht, "zinkes", "grape");
 
-#elif defined(CPU_64_BIT)
+#elif HT_HASH_WIDTH == 64
 
     // Create a collision - 64 bit hash (0x4EAC0C95540867E4)
     ht_strstr_insert(ht, "8yn0iYCKYHlIj4-BwPqk", "apple");
