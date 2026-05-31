@@ -1,5 +1,5 @@
 project('libhashtable', 'c',
-        default_options: 'c_std=c99',
+        default_options: 'c_std=c11',
         version: '0.7.0',
         license: 'MIT')
 
