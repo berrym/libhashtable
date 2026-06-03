@@ -30,22 +30,17 @@ typedef enum {
 } ht_flags_enum_t;
 
 /* Hash width: 32 or 64. Override at build time with -DHT_HASH_WIDTH=32|64.
- * Legacy -DCPU_32_BIT / -DCPU_64_BIT are still recognized. Otherwise the
- * width is selected from UINTPTR_MAX so the typed wrappers and FNV-1a
- * constants stay in agreement with the host word size. */
+ * Otherwise the width is selected from UINTPTR_MAX so the typed wrappers and
+ * FNV-1a constants stay in agreement with the host word size. */
 #if !defined(HT_HASH_WIDTH)
-#  if defined(CPU_32_BIT)
-#    define HT_HASH_WIDTH 32
-#  elif defined(CPU_64_BIT)
-#    define HT_HASH_WIDTH 64
-#  elif UINTPTR_MAX == 0xFFFFFFFFu
-#    define HT_HASH_WIDTH 32
-#  else
-#    define HT_HASH_WIDTH 64
-#  endif
+#if UINTPTR_MAX == 0xFFFFFFFFu
+#define HT_HASH_WIDTH 32
+#else
+#define HT_HASH_WIDTH 64
+#endif
 #endif
 #if HT_HASH_WIDTH != 32 && HT_HASH_WIDTH != 64
-#  error "HT_HASH_WIDTH must be 32 or 64"
+#error "HT_HASH_WIDTH must be 32 or 64"
 #endif
 
 #if HT_HASH_WIDTH == 32
