@@ -29,29 +29,10 @@ typedef enum {
     HT_SEED_RANDOM,
 } ht_flags_enum_t;
 
-/* Hash width: 32 or 64. Override at build time with -DHT_HASH_WIDTH=32|64.
- * Otherwise the width is selected from UINTPTR_MAX so the typed wrappers and
- * FNV-1a constants stay in agreement with the host word size. */
-#if !defined(HT_HASH_WIDTH)
-#if UINTPTR_MAX == 0xFFFFFFFFu
-#define HT_HASH_WIDTH 32
-#else
-#define HT_HASH_WIDTH 64
-#endif
-#endif
-#if HT_HASH_WIDTH != 32 && HT_HASH_WIDTH != 64
-#error "HT_HASH_WIDTH must be 32 or 64"
-#endif
-
-#if HT_HASH_WIDTH == 32
-typedef uint32_t ht_hash_t;
-#define FNV1A_PRIME (0x01000193u)  ///< 16777619 (32 bit)
-#define FNV1A_OFFSET (0x811C9DC5u) ///< 2166136261 (32 bit)
-#else
+/* Hash values are unconditionally 64-bit. */
 typedef uint64_t ht_hash_t;
-#define FNV1A_PRIME (0x00000100000001B3ull)  ///< 1099511628211 (64 bit)
-#define FNV1A_OFFSET (0xCBF29CE484222325ull) ///< 14695981039346656037 (64 bit)
-#endif
+#define FNV1A_PRIME (0x00000100000001B3ull)  ///< 1099511628211
+#define FNV1A_OFFSET (0xCBF29CE484222325ull) ///< 14695981039346656037
 
 typedef ht_hash_t (*ht_hash)(const void *, ht_hash_t);
 typedef bool (*ht_keyeq)(const void *, const void *);

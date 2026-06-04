@@ -13,8 +13,7 @@
 #include <string.h>
 #include <strings.h>
 
-/// Return a hash key using the FNV1A algorithm at the configured
-/// HT_HASH_WIDTH (32 or 64 bit).
+/// Return a hash key using the FNV1A algorithm (64-bit).
 static ht_hash_t __fnv1a_hash(const void *key, ht_hash_t seed,
                               bool ignore_case) {
     ht_hash_t h = seed;
@@ -42,11 +41,7 @@ ht_hash_t fnv1a_hash_str_casecmp(const void *key, ht_hash_t seed) {
 }
 
 /// Case sensitive string comparison function.
-bool str_eq(const void *a, const void *b) {
-    return strcmp(a, b) == 0;
-}
+bool str_eq(const void *a, const void *b) { return strcmp(a, b) == 0; }
 
 /// Case insensitive string comparison function.
-bool str_caseeq(const void *a, const void *b) {
-    return strcasecmp(a, b) == 0;
-}
+bool str_caseeq(const void *a, const void *b) { return strcasecmp(a, b) == 0; }

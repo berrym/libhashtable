@@ -35,17 +35,7 @@ The test programs can be found and executed from the build directory, e.g.
 
 ## Hash width
 
-The FNV-1a hash returns either a 32-bit or a 64-bit value. The width is
-selected at build time:
-
-* default (`-Dhash_width=auto`): the header picks 32 or 64 from `UINTPTR_MAX`,
-  so the typed wrappers and FNV-1a constants agree with the host word size.
-* `-Dhash_width=32` or `-Dhash_width=64`: force a specific width, useful for
-  hash-stability tests or cross-compile vectors.
-
-The hash width is also overridable directly from the compiler with
-`-DHT_HASH_WIDTH=32` or `-DHT_HASH_WIDTH=64`. Legacy `-DCPU_32_BIT` and
-`-DCPU_64_BIT` defines are still recognized when `HT_HASH_WIDTH` is not set.
+Hash values are unconditionally 64-bit (`ht_hash_t` is `uint64_t`).
 
 The previously separate `32bit` and `64bit` branches are deprecated as of
 v0.7.0. Their final commits are preserved at the tags `archive/32bit-final`

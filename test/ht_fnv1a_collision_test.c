@@ -25,28 +25,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-#if HT_HASH_WIDTH == 32
-
-    // Create a collision - 32 bit hash
-    ht_strstr_insert(ht, "costarring", "apple");
-    ht_strstr_insert(ht, "liquid", "orange");
-
-    ht_strstr_remove(ht, "costarring");
-
-    // Create another collision - 32 bit hash
-    ht_strstr_insert(ht, "declinate", "banana");
-    ht_strstr_insert(ht, "macallums", "pineapple");
-
-    // Create another collision - 32 bit hash
-    ht_strstr_insert(ht, "altarage", "strawberry");
-    ht_strstr_insert(ht, "zinke", "mango");
-
-    // Create another collision - 32 bit hash
-    ht_strstr_insert(ht, "altarages", "pear");
-    ht_strstr_insert(ht, "zinkes", "grape");
-
-#elif HT_HASH_WIDTH == 64
-
     // Create a collision - 64 bit hash (0x4EAC0C95540867E4)
     ht_strstr_insert(ht, "8yn0iYCKYHlIj4-BwPqk", "apple");
     ht_strstr_insert(ht, "GReLUrM4wMqfg9yzV3KQ", "orange");
@@ -68,8 +46,6 @@ int main(int argc, char **argv) {
     // Create another collision - 64 bit hash (0x703C4DD295D7AA15)
     ht_strstr_insert(ht, "6a5x-VbtXk", "blackberry");
     ht_strstr_insert(ht, "f_2k7GG-4v", "raspberry");
-
-#endif
 
     for (size_t i = 0; i < len; i++) {
         snprintf(t1, sizeof(t1), "a%zu", i);

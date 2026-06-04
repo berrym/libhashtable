@@ -47,15 +47,9 @@ struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
  *      Generate a random hash offset.
  */
 static void __random_seed(ht_t *ht) {
-#if HT_HASH_WIDTH == 32
-    uint32_t seed = (uint32_t)time(NULL);
-    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
-    seed ^= (uint32_t)&ht;
-#else
     uint64_t seed = (uint64_t)time(NULL);
     seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
     seed ^= (uint64_t)&ht;
-#endif
     ht->seed = seed;
 }
 
