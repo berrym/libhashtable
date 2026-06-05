@@ -34,6 +34,11 @@ test_ht_int_exe = executable('test_ht_int',
 			                 include_directories : inc,
 			                 link_with : libhashtable)
 
+test_ht_bulk_exe = executable('test_ht_bulk',
+			                  'ht_bulk_test.c',
+			                  include_directories : inc,
+			                  link_with : libhashtable)
+
 test('libhashtable', test_ht_strstr_exe)
 test('libhashtable', test_ht_strint_exe)
 test('libhashtable', test_ht_strfloat_exe)
@@ -41,3 +46,4 @@ test('libhashtable', test_ht_strdouble_exe)
 test('libhashtable', test_ht_fnv1a_collision_exe)
 test('libhashtable', test_ht_random_exe)
 test('libhashtable', test_ht_int_exe)
+test('libhashtable', test_ht_bulk_exe)

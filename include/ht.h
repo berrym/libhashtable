@@ -56,6 +56,9 @@ ht_hash_t ht_hash_fnv1a_casecmp(const void *, size_t, const void *);
 /// Integer-key hash via the splitmix64 (Stafford Mix13) finalizer
 ht_hash_t ht_hash_int(const void *, size_t, const void *);
 
+/// Bulk hash (wyhash) for long string and binary keys
+ht_hash_t ht_hash_bulk(const void *, size_t, const void *);
+
 /// String key equality functions
 bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
