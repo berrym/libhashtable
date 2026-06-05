@@ -59,6 +59,12 @@ ht_hash_t ht_hash_int(const void *, size_t, const void *);
 /// Bulk hash (wyhash) for long string and binary keys
 ht_hash_t ht_hash_bulk(const void *, size_t, const void *);
 
+/// Keyed SipHash for adversarial input; hashkey must point to a 16-byte key.
+/// ht_hash_siphash is SipHash-1-3 (faster default); ht_hash_siphash24 is
+/// SipHash-2-4 (conservative).
+ht_hash_t ht_hash_siphash(const void *, size_t, const void *);
+ht_hash_t ht_hash_siphash24(const void *, size_t, const void *);
+
 /// String key equality functions
 bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
