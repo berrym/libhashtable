@@ -37,9 +37,8 @@ The test programs can be found and executed from the build directory, e.g.
 
 Hash values are unconditionally 64-bit (`ht_hash_t` is `uint64_t`).
 
-The previously separate `32bit` and `64bit` branches are deprecated as of
-v0.7.0. Their final commits are preserved at the tags `archive/32bit-final`
-and `archive/64bit-final`. All work now happens on `master`.
+The previously separate `32bit` and `64bit` branches were unified into
+`master` in v0.7.0 and have been removed. All work happens on `master`.
 
 ## Version
 
