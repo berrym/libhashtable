@@ -26,8 +26,9 @@ typedef struct ht_strstr ht_strstr_t;
 
 typedef enum {
     HT_STR_NONE = 0,
-    HT_STR_CASECMP,
-    HT_SEED_RANDOM,
+    HT_STR_CASECMP = 1,
+    HT_SEED_RANDOM = 2,
+    HT_SEED_BEST_EFFORT = 4,
 } ht_flags_enum_t;
 
 /* Hash values are unconditionally 64-bit. */

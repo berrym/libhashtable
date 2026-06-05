@@ -17,7 +17,8 @@
 #define MAX_CAPACITY                                                           \
     (1 << 31) // Maximum capacity of table when it should not grow and rehash
               // (2147483648)
-#define GROWTH_FACTOR (2) // Factor by which a table's capacity should grow
+#define GROWTH_FACTOR (2)   // Factor by which a table's capacity should grow
+#define HT_HASHKEY_MAX (16) // Key buffer size for keyed hashes (SipHash key)
 
 typedef struct ht_bucket {
     const void *key;
@@ -33,6 +34,8 @@ struct ht { // typedefed to ht_t in ht.h for external scope
     ht_bucket_t *buckets;
     size_t capacity;
     size_t used_buckets;
+    unsigned char hashkey[HT_HASHKEY_MAX];
+    bool keyed;
 };
 
 struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
@@ -58,7 +61,8 @@ static void __ht_passthrough_destroy(const void *v) { return; }
  *      Return the table index of a bucket given it's key.
  */
 static size_t __ht_bucket_index(const ht_t *ht, const void *key) {
-    return ht->hfunc(key, ht->keylen(key), NULL) % ht->capacity;
+    return ht->hfunc(key, ht->keylen(key), ht->keyed ? ht->hashkey : NULL) %
+           ht->capacity;
 }
 
 /**
@@ -246,6 +250,21 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
     if (!ht->buckets) {
         perror("ht_create");
         return NULL;
+    }
+
+    if (flags & HT_SEED_RANDOM) {
+        if (ht_random_bytes(ht->hashkey, HT_HASHKEY_MAX) == 0) {
+            ht->keyed = true;
+        } else if (flags & HT_SEED_BEST_EFFORT) {
+            /// Entropy unavailable: proceed with the zeroed key buffer. The
+            /// table is usable but a keyed hash is not flooding-resistant.
+            ht->keyed = true;
+        } else {
+            /// Fail closed: a keyed table was requested but the CSPRNG failed.
+            free(ht->buckets);
+            free(ht);
+            return NULL;
+        }
     }
 
     return ht;
