@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #define INITIAL_BUCKETS (16) // Initial table size
 #define MAX_LOAD_FACTOR                                                        \
@@ -29,11 +28,11 @@ typedef struct ht_bucket {
 struct ht { // typedefed to ht_t in ht.h for external scope
     ht_hash hfunc;
     ht_keyeq keyeq;
+    ht_keylen keylen;
     ht_callbacks_t callbacks;
     ht_bucket_t *buckets;
     size_t capacity;
     size_t used_buckets;
-    ht_hash_t seed;
 };
 
 struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
@@ -41,23 +40,6 @@ struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
     ht_bucket_t *cur;
     size_t idx;
 };
-
-/**
- * __random_seed:
- *      Generate a random hash offset.
- */
-static void __random_seed(ht_t *ht) {
-    uint64_t seed = (uint64_t)time(NULL);
-    seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
-    seed ^= (uint64_t)&ht;
-    ht->seed = seed;
-}
-
-/**
- * __default_seed:
- *      Use a default hash offset for FNV1A algorithm.
- */
-static void __default_seed(ht_t *ht) { ht->seed = FNV1A_OFFSET; }
 
 /**
  * __ht_passthrough_copy:
@@ -76,7 +58,7 @@ static void __ht_passthrough_destroy(const void *v) { return; }
  *      Return the table index of a bucket given it's key.
  */
 static size_t __ht_bucket_index(const ht_t *ht, const void *key) {
-    return ht->hfunc(key, ht->seed) % ht->capacity;
+    return ht->hfunc(key, ht->keylen(key), NULL) % ht->capacity;
 }
 
 /**
@@ -221,10 +203,11 @@ static void __ht_rehash(ht_t *ht) {
  * operations function callbacks structure.
  */
 ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
-                const ht_callbacks_t *callbacks, const unsigned int flags) {
+                const ht_keylen keylen, const ht_callbacks_t *callbacks,
+                const unsigned int flags) {
     ht_t *ht = NULL;
 
-    if (!hfunc || !keyeq) {
+    if (!hfunc || !keyeq || !keylen) {
         return NULL;
     }
 
@@ -236,6 +219,7 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
 
     ht->hfunc = hfunc;
     ht->keyeq = keyeq;
+    ht->keylen = keylen;
 
     ht->callbacks.key_copy = __ht_passthrough_copy;
     ht->callbacks.key_free = __ht_passthrough_destroy;
@@ -262,12 +246,6 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
     if (!ht->buckets) {
         perror("ht_create");
         return NULL;
-    }
-
-    if (flags & HT_SEED_RANDOM) {
-        __random_seed(ht);
-    } else {
-        __default_seed(ht);
     }
 
     return ht;

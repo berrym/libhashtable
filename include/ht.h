@@ -10,6 +10,7 @@
 #define __HT_H__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -34,8 +35,9 @@ typedef uint64_t ht_hash_t;
 #define FNV1A_PRIME (0x00000100000001B3ull)  ///< 1099511628211
 #define FNV1A_OFFSET (0xCBF29CE484222325ull) ///< 14695981039346656037
 
-typedef ht_hash_t (*ht_hash)(const void *, ht_hash_t);
+typedef ht_hash_t (*ht_hash)(const void *, size_t, const void *);
 typedef bool (*ht_keyeq)(const void *, const void *);
+typedef size_t (*ht_keylen)(const void *);
 typedef void *(*ht_kcopy)(const void *);
 typedef void (*ht_kfree)(const void *);
 typedef void *(*ht_vcopy)(const void *);
@@ -48,16 +50,19 @@ typedef struct {
     ht_vfree val_free;
 } ht_callbacks_t;
 
-ht_hash_t fnv1a_hash_str(const void *, ht_hash_t);
-ht_hash_t fnv1a_hash_str_casecmp(const void *, ht_hash_t);
+ht_hash_t fnv1a_hash_str(const void *, size_t, const void *);
+ht_hash_t fnv1a_hash_str_casecmp(const void *, size_t, const void *);
 
-// String key equality functinos
+/// String key equality functions
 bool str_eq(const void *, const void *);
 bool str_caseeq(const void *, const void *);
 
+/// String key length function
+size_t str_len(const void *);
+
 // Creation and destruction
-ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_callbacks_t *,
-                const unsigned int);
+ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_keylen,
+                const ht_callbacks_t *, const unsigned int);
 void ht_destroy(ht_t *);
 ht_strdouble_t *ht_strdouble_create(unsigned int);
 void ht_strdouble_destroy(ht_strdouble_t *);

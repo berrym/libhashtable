@@ -42,7 +42,7 @@ ht_strint_t *ht_strint_create(unsigned int flags) {
         keyeq = str_caseeq;
     }
 
-    return (ht_strint_t *)ht_create(hash, keyeq, &callbacks, flags);
+    return (ht_strint_t *)ht_create(hash, keyeq, str_len, &callbacks, flags);
 }
 
 /**

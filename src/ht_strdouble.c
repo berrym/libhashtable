@@ -42,7 +42,7 @@ ht_strdouble_t *ht_strdouble_create(unsigned int flags) {
         keyeq = str_caseeq;
     }
 
-    return (ht_strdouble_t *)ht_create(hash, keyeq, &callbacks, flags);
+    return (ht_strdouble_t *)ht_create(hash, keyeq, str_len, &callbacks, flags);
 }
 
 /**

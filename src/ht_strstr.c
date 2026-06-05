@@ -27,7 +27,7 @@ ht_strstr_t *ht_strstr_create(unsigned int flags) {
         keyeq = str_caseeq;
     }
 
-    return (ht_strstr_t *)ht_create(hash, keyeq, &callbacks, flags);
+    return (ht_strstr_t *)ht_create(hash, keyeq, str_len, &callbacks, flags);
 }
 
 /**
