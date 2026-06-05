@@ -60,6 +60,11 @@ bool str_caseeq(const void *, const void *);
 /// String key length function
 size_t str_len(const void *);
 
+/// Fill the first len bytes of buf with cryptographically strong random data.
+/// Returns 0 on success, -1 on failure. On failure buf is unusable and a weak
+/// entropy source is never substituted.
+int ht_random_bytes(void *buf, size_t len);
+
 // Creation and destruction
 ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_keylen,
                 const ht_callbacks_t *, const unsigned int);

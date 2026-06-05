@@ -24,8 +24,14 @@ test_ht_fnv1a_collision_exe = \
              include_directories: inc,
              link_with: libhashtable)
 
+test_ht_random_exe = executable('test_ht_random',
+			                    'ht_random_test.c',
+			                    include_directories : inc,
+			                    link_with : libhashtable)
+
 test('libhashtable', test_ht_strstr_exe)
 test('libhashtable', test_ht_strint_exe)
 test('libhashtable', test_ht_strfloat_exe)
 test('libhashtable', test_ht_strdouble_exe)
 test('libhashtable', test_ht_fnv1a_collision_exe)
+test('libhashtable', test_ht_random_exe)
