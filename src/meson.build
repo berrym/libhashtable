@@ -4,7 +4,8 @@ libhashtable_sources = ['ht.c',
                         'ht_strfloat.c',
                         'ht_strdouble.c',
                         'ht_fnv1a.c',
-                        'ht_random.c']
+                        'ht_random.c',
+                        'ht_int.c']
 
 libhashtable_deps = []
 if host_machine.system() == 'windows'
