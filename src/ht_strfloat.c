@@ -31,14 +31,14 @@ static float *__floatdup(const float *val) {
  *      Wrapper aroung ht_create that creates a string->float hash table.
  */
 ht_strfloat_t *ht_strfloat_create(unsigned int flags) {
-    ht_hash hash = fnv1a_hash_str;
+    ht_hash hash = ht_hash_fnv1a;
     ht_keyeq keyeq = str_eq;
     const ht_callbacks_t callbacks = {
         (void *(*)(const void *))strdup, (void (*)(const void *))free,
         (void *(*)(const void *))__floatdup, (void (*)(const void *))free};
 
     if (flags & HT_STR_CASECMP) {
-        hash = fnv1a_hash_str_casecmp;
+        hash = ht_hash_fnv1a_casecmp;
         keyeq = str_caseeq;
     }
 

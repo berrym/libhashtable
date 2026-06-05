@@ -32,15 +32,15 @@ static ht_hash_t __fnv1a_hash(const void *key, size_t len, bool ignore_case) {
 
 /// Wrapper around __fnv1a_hash that uses case sensitive keys. The hashkey
 /// argument is unused: FNV-1a is an unkeyed hash.
-ht_hash_t fnv1a_hash_str(const void *key, size_t len, const void *hashkey) {
+ht_hash_t ht_hash_fnv1a(const void *key, size_t len, const void *hashkey) {
     (void)hashkey;
     return __fnv1a_hash(key, len, false);
 }
 
 /// Wrapper around __fnv1a_hash that uses case insensitive keys. The hashkey
 /// argument is unused: FNV-1a is an unkeyed hash.
-ht_hash_t fnv1a_hash_str_casecmp(const void *key, size_t len,
-                                 const void *hashkey) {
+ht_hash_t ht_hash_fnv1a_casecmp(const void *key, size_t len,
+                                const void *hashkey) {
     (void)hashkey;
     return __fnv1a_hash(key, len, true);
 }

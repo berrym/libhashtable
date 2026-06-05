@@ -50,8 +50,8 @@ typedef struct {
     ht_vfree val_free;
 } ht_callbacks_t;
 
-ht_hash_t fnv1a_hash_str(const void *, size_t, const void *);
-ht_hash_t fnv1a_hash_str_casecmp(const void *, size_t, const void *);
+ht_hash_t ht_hash_fnv1a(const void *, size_t, const void *);
+ht_hash_t ht_hash_fnv1a_casecmp(const void *, size_t, const void *);
 
 /// String key equality functions
 bool str_eq(const void *, const void *);
