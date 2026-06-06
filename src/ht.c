@@ -43,6 +43,7 @@ struct ht {
     unsigned char hashkey[HT_HASHKEY_MAX];
     bool keyed;
     void *user_data;
+    size_t grow_count;
 };
 
 /// typedefed to ht_enum_t in ht.h for external scope
@@ -175,6 +176,7 @@ static void __ht_rehash(ht_t *ht) {
         perror("__ht_rehash");
         return;
     }
+    ht->grow_count++;
 
     for (size_t i = 0; i < capacity; i++) {
         if (!buckets[i].key) {
@@ -526,6 +528,47 @@ void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data) {
              cur = cur->next) {
             visit(cur->key, cur->val, user_data);
         }
+    }
+}
+
+/// Fill out with a snapshot of the table's structural statistics. The entry
+/// count and grow count are read directly; the per-bucket figures come from a
+/// single pass over the buckets, so this never touches the insert, lookup, or
+/// remove paths.
+void ht_stats(const ht_t *ht, ht_stats_t *out) {
+    if (!out) {
+        return;
+    }
+
+    *out = (ht_stats_t){0};
+
+    if (!ht) {
+        return;
+    }
+
+    out->size = ht->used_buckets;
+    out->capacity = ht->capacity;
+    out->grow_count = ht->grow_count;
+
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (!ht->buckets[i].key) {
+            continue;
+        }
+
+        out->occupied_buckets++;
+
+        size_t chain = 1;
+        for (const ht_bucket_t *cur = ht->buckets[i].next; cur;
+             cur = cur->next) {
+            chain++;
+        }
+        if (chain > out->max_chain) {
+            out->max_chain = chain;
+        }
+    }
+
+    if (ht->capacity) {
+        out->load_factor = (double)ht->used_buckets / (double)ht->capacity;
     }
 }
 

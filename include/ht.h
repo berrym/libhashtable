@@ -141,6 +141,23 @@ typedef struct {
     size_t initial_capacity; ///< 0 => default
 } ht_u64_options_t;
 
+/**
+ * @brief A snapshot of a table's structural statistics, filled by ht_stats.
+ *
+ * All fields describe the table at the moment of the call. size and grow_count
+ * are tracked cheaply during normal operation; the remaining fields are derived
+ * by a single pass over the buckets, so ht_stats costs O(capacity) and imposes
+ * no cost on insert, lookup, or remove.
+ */
+typedef struct {
+    size_t size;             ///< entries stored
+    size_t capacity;         ///< bucket slots allocated
+    size_t occupied_buckets; ///< slots holding at least one entry
+    size_t max_chain;        ///< entries in the longest collision chain
+    size_t grow_count;       ///< grow-and-rehash events since creation
+    double load_factor;      ///< size / capacity (0 when capacity is 0)
+} ht_stats_t;
+
 /* Hash algorithm menu. Each matches the ht_hash signature; pick the algorithm
  * that fits the key shape. */
 
@@ -683,6 +700,14 @@ void ht_clear(ht_t *ht);
  * @note The table must not be modified during iteration.
  */
 void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data);
+
+/**
+ * @brief Collect a snapshot of the table's structural statistics.
+ * @param ht The table.
+ * @param out Destination snapshot; filled with zeros when ht is NULL.
+ * @note Reads the table without modifying it; costs O(capacity).
+ */
+void ht_stats(const ht_t *ht, ht_stats_t *out);
 
 /* Enumeration. An enumeration object is a cursor over a table's entries. */
 
