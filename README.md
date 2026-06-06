@@ -2,47 +2,113 @@
 
 ## Description
 
-A small generic hashtable library written in C with type wrapped implementations for common table types.
+A small, general-purpose hash table library in C (C11 + POSIX). It pairs a
+generic `void *` core with type-safe wrappers and a curated menu of
+type-matched hash algorithms, so the right hash is used for the shape of the
+keys — short strings, integers, long blobs, or untrusted input.
 
 ## Getting Started
 
-Install meson and ninja build system
+Install the meson and ninja build systems, then clone and build:
 
-Clone the git repository:
+```
+git clone https://github.com/berrym/libhashtable.git
+meson setup buildDir
+meson compile -C buildDir
+```
 
-* git clone https://github.com/berrym/libhashtable.git
+Run the test suite:
 
-Build:
+```
+meson test -C buildDir
+```
 
-For modern meson users:
+Build the example programs (off by default):
 
-* meson setup buildDir
-* cd buildDir
-* meson compile
+```
+meson setup buildDir -Dexamples=true
+meson compile -C buildDir
+```
 
-For legacy meson users:
+## Usage
 
-* meson setup buildDir
-* cd buildDir
-* meson ninja
+The typed wrappers are the easy path — each pairs a key/value type with a
+sensible default hash:
 
+```c
+#include "ht.h"
 
-## Executing program
+ht_strint_t *counts = ht_strint_create(NULL); /* case-sensitive, FNV-1a */
+int n = 1;
+ht_strint_insert(counts, "apple", &n);
+const int *got = ht_strint_get(counts, "apple");
+ht_strint_destroy(counts);
+```
 
-The test programs can be found and executed from the build directory, e.g.
+The generic core is constructed from an options struct; zero-initialized fields
+take sensible defaults (passthrough callbacks, unkeyed, default capacity):
 
-* buildDir/test/test_name_exe
+```c
+ht_t *t = ht_create(&(ht_options_t){
+    .hash = ht_hash_fnv1a,
+    .keyeq = str_eq,
+    .keylen = str_len,
+    .callbacks = {.key_copy = my_key_copy, .key_free = my_key_free},
+});
+```
 
-## Hash width
+For untrusted keys, request a flooding-resistant table, which selects keyed
+SipHash with a per-table random key:
 
-Hash values are unconditionally 64-bit (`ht_hash_t` is `uint64_t`).
+```c
+ht_strstr_t *routes =
+    ht_strstr_create(&(ht_str_options_t){.flooding_resistant = true});
+```
 
-The previously separate `32bit` and `64bit` branches were unified into
-`master` in v0.7.0 and have been removed. All work happens on `master`.
+## Hash algorithm menu
+
+| Function                              | Best for                                  |
+|---------------------------------------|-------------------------------------------|
+| `ht_hash_fnv1a` / `ht_hash_fnv1a_casecmp` | short strings                         |
+| `ht_hash_int`                         | integers, pointers, identity keys         |
+| `ht_hash_bulk`                        | long strings and binary blobs (wyhash)    |
+| `ht_hash_siphash` / `ht_hash_siphash24` | untrusted keys (keyed SipHash 1-3 / 2-4) |
+
+Hash values are 64-bit (`ht_hash_t` is `uint64_t`). The hash signature is
+`uint64_t (*)(const void *key, size_t len, const void *hashkey)`; `hashkey` is
+the keying material for keyed PRFs and NULL for unkeyed hashes.
+
+## Typed wrappers
+
+- `ht_strstr`, `ht_strint`, `ht_strfloat`, `ht_strdouble` — string key to a
+  typed value.
+- `ht_strblob` — string key to a binary value (embedded NUL bytes preserved).
+- `ht_strptr` — string key to a caller-owned pointer.
+- `ht_strset` — a set of strings (membership only).
+- `ht_u64ptr`, `ht_u64blob` — 64-bit integer key to a pointer or binary value,
+  hashed with the integer finalizer.
+
+String-keyed wrappers take an `ht_str_options_t` (`case_insensitive`,
+`flooding_resistant`, `best_effort`, `initial_capacity`); integer-keyed
+wrappers take an `ht_u64_options_t`. A NULL options pointer selects the
+defaults.
+
+## Compound operations
+
+In addition to `ht_insert` / `ht_get` / `ht_remove`, the core provides
+`ht_size`, `ht_contains`, `ht_get_or_insert`, `ht_upsert`, `ht_clear`, and
+`ht_foreach`.
+
+## Thread safety
+
+The library holds no hidden shared mutable state and reads never mutate, so it
+is safe under caller (external) locking. The compound operations are
+single-call, which lets a caller holding its own lock avoid
+time-of-check-to-time-of-use sequences. There is no built-in lock.
 
 ## Version
 
-v0.7.0 - stable release
+v0.8.0
 
 ## Authors
 
