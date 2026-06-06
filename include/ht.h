@@ -24,6 +24,7 @@ typedef struct ht_strdouble ht_strdouble_t;
 typedef struct ht_strfloat ht_strfloat_t;
 typedef struct ht_strint ht_strint_t;
 typedef struct ht_strstr ht_strstr_t;
+typedef struct ht_u64ptr ht_u64ptr_t;
 
 typedef enum {
     HT_KEY_NONE = 0, ///< unkeyed hash; hashkey is NULL
@@ -76,6 +77,16 @@ typedef struct {
     size_t initial_capacity; ///< 0 => default
 } ht_str_options_t;
 
+/// Construction options for the integer-keyed (uint64) typed wrappers.
+/// flooding_resistant selects keyed SipHash over the key bytes for adversarial
+/// keys; otherwise the integer finalizer is used. Zero-initialized => an
+/// unkeyed table at the default capacity.
+typedef struct {
+    bool flooding_resistant; ///< keyed SipHash with a random per-table key
+    bool best_effort;        ///< flooding_resistant: degrade vs fail
+    size_t initial_capacity; ///< 0 => default
+} ht_u64_options_t;
+
 ht_hash_t ht_hash_fnv1a(const void *, size_t, const void *);
 ht_hash_t ht_hash_fnv1a_casecmp(const void *, size_t, const void *);
 
@@ -116,6 +127,8 @@ ht_strint_t *ht_strint_create(const ht_str_options_t *);
 void ht_strint_destroy(ht_strint_t *);
 ht_strstr_t *ht_strstr_create(const ht_str_options_t *);
 void ht_strstr_destroy(ht_strstr_t *);
+ht_u64ptr_t *ht_u64ptr_create(const ht_u64_options_t *);
+void ht_u64ptr_destroy(ht_u64ptr_t *);
 
 // Insertion and removal
 void ht_insert(ht_t *, const void *, const void *);
@@ -130,6 +143,8 @@ void ht_strint_insert(ht_strint_t *, const char *, const int *);
 void ht_strint_remove(ht_strint_t *, const char *);
 void ht_strstr_insert(ht_strstr_t *, const char *, const char *);
 void ht_strstr_remove(ht_strstr_t *, const char *);
+void ht_u64ptr_insert(ht_u64ptr_t *, uint64_t, void *);
+void ht_u64ptr_remove(ht_u64ptr_t *, uint64_t);
 
 // Getting
 void *ht_get(const ht_t *, const void *);
@@ -138,6 +153,7 @@ void *ht_strdouble_get(ht_strdouble_t *, const char *);
 void *ht_strfloat_get(ht_strfloat_t *, const char *);
 void *ht_strint_get(ht_strint_t *, const char *);
 const char *ht_strstr_get(ht_strstr_t *, const char *);
+void *ht_u64ptr_get(ht_u64ptr_t *, uint64_t);
 
 /* Size, membership, and bulk operations */
 size_t ht_size(const ht_t *);
@@ -166,6 +182,9 @@ void ht_strint_enum_destroy(ht_enum_t *);
 ht_enum_t *ht_strstr_enum_create(ht_strstr_t *);
 bool ht_strstr_enum_next(ht_enum_t *, const char **, const char **);
 void ht_strstr_enum_destroy(ht_enum_t *);
+ht_enum_t *ht_u64ptr_enum_create(ht_u64ptr_t *);
+bool ht_u64ptr_enum_next(ht_enum_t *, uint64_t *, void **);
+void ht_u64ptr_enum_destroy(ht_enum_t *);
 
 #ifdef __cplusplus
 }
