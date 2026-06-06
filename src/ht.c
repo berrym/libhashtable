@@ -451,6 +451,120 @@ void *ht_get(const ht_t *ht, const void *key) {
 }
 
 /**
+ * ht_size:
+ *      Return the number of entries currently stored in the table.
+ */
+size_t ht_size(const ht_t *ht) { return ht ? ht->used_buckets : 0; }
+
+/**
+ * ht_contains:
+ *      Return whether a key is present. Unlike comparing ht_get against NULL,
+ * this distinguishes an absent key from a key stored with a NULL value.
+ */
+bool ht_contains(const ht_t *ht, const void *key) {
+    void *val = NULL;
+    return __ht_get(ht, key, &val);
+}
+
+/**
+ * ht_get_or_insert:
+ *      Return the value stored under key, first inserting the key/value pair if
+ * the key is absent. A single call avoids the time-of-check-to-time-of-use gap
+ * of a separate get followed by an insert.
+ */
+void *ht_get_or_insert(ht_t *ht, const void *key, const void *val) {
+    if (!ht || !key) {
+        return NULL;
+    }
+
+    void *existing = NULL;
+    if (__ht_get(ht, key, &existing)) {
+        return existing;
+    }
+
+    ht_insert(ht, key, val);
+    __ht_get(ht, key, &existing);
+    return existing;
+}
+
+/**
+ * ht_upsert:
+ *      Insert a key/value pair, replacing any existing value. Returns true if
+ * the key was newly added and false if an existing value was replaced.
+ */
+bool ht_upsert(ht_t *ht, const void *key, const void *val) {
+    if (!ht || !key) {
+        return false;
+    }
+
+    const bool existed = ht_contains(ht, key);
+    ht_insert(ht, key, val);
+    return !existed;
+}
+
+/**
+ * ht_clear:
+ *      Remove every entry, freeing keys and values through the callbacks, while
+ * keeping the table allocated and reusable.
+ */
+void ht_clear(ht_t *ht) {
+    if (!ht) {
+        return;
+    }
+
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (!ht->buckets[i].key) {
+            continue;
+        }
+
+        ht->callbacks.key_free(ht->buckets[i].key);
+        if (ht->buckets[i].val) {
+            ht->callbacks.val_free(ht->buckets[i].val);
+        }
+
+        ht_bucket_t *cur = ht->buckets[i].next;
+        while (cur) {
+            ht_bucket_t *next = cur->next;
+            ht->callbacks.key_free(cur->key);
+            if (cur->val) {
+                ht->callbacks.val_free(cur->val);
+            }
+            free(cur);
+            cur = next;
+        }
+
+        ht->buckets[i].key = NULL;
+        ht->buckets[i].val = NULL;
+        ht->buckets[i].next = NULL;
+    }
+
+    ht->used_buckets = 0;
+}
+
+/**
+ * ht_foreach:
+ *      Invoke visit(key, val, user_data) for every entry. The table must not be
+ * modified during the iteration.
+ */
+void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data) {
+    if (!ht || !visit) {
+        return;
+    }
+
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (!ht->buckets[i].key) {
+            continue;
+        }
+
+        visit(ht->buckets[i].key, ht->buckets[i].val, user_data);
+        for (const ht_bucket_t *cur = ht->buckets[i].next; cur;
+             cur = cur->next) {
+            visit(cur->key, cur->val, user_data);
+        }
+    }
+}
+
+/**
  * ht_enum_create:
  *      Create a table enumeration object.
  */

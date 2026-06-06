@@ -42,6 +42,7 @@ typedef void *(*ht_kcopy)(const void *);
 typedef void (*ht_kfree)(const void *);
 typedef void *(*ht_vcopy)(const void *);
 typedef void (*ht_vfree)(const void *);
+typedef void (*ht_visit)(const void *, const void *, void *);
 
 typedef struct {
     ht_kcopy key_copy;
@@ -131,6 +132,14 @@ void *ht_strdouble_get(ht_strdouble_t *, const char *);
 void *ht_strfloat_get(ht_strfloat_t *, const char *);
 void *ht_strint_get(ht_strint_t *, const char *);
 const char *ht_strstr_get(ht_strstr_t *, const char *);
+
+/* Size, membership, and bulk operations */
+size_t ht_size(const ht_t *);
+bool ht_contains(const ht_t *, const void *);
+void *ht_get_or_insert(ht_t *, const void *, const void *);
+bool ht_upsert(ht_t *, const void *, const void *);
+void ht_clear(ht_t *);
+void ht_foreach(const ht_t *, ht_visit, void *);
 
 // Enumeration
 ht_enum_t *ht_enum_create(ht_t *);
