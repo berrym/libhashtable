@@ -11,3 +11,7 @@ inc = include_directories('include')
 subdir('src')
 subdir('include')
 subdir('test')
+
+if get_option('examples')
+  subdir('examples')
+endif
