@@ -25,10 +25,22 @@
 #define GROWTH_FACTOR (2)   ///< Factor by which a table's capacity should grow
 #define HT_HASHKEY_MAX (16) ///< Key buffer size for keyed hashes (SipHash key)
 
+/// Insertion-order overlay node. The nodes form a doubly-linked list in
+/// insertion order, independent of the bucket array. Each holds the entry's
+/// (stable) key pointer; the value is looked up on demand during ordered
+/// enumeration. The list is untouched by a rehash because key pointers do not
+/// move, so only the bucket->order back-pointers are re-threaded there.
+typedef struct ht_order {
+    const void *key;
+    struct ht_order *prev;
+    struct ht_order *next;
+} ht_order_t;
+
 typedef struct ht_bucket {
     const void *key;
     const void *val;
     struct ht_bucket *next;
+    ht_order_t *order; ///< owning order node, or NULL when ordering is off
 } ht_bucket_t;
 
 /// typedefed to ht_t in ht.h for external scope
@@ -44,6 +56,9 @@ struct ht {
     bool keyed;
     void *user_data;
     size_t grow_count;
+    bool ordered;           ///< maintain the insertion-order overlay
+    ht_order_t *order_head; ///< oldest entry, or NULL when empty
+    ht_order_t *order_tail; ///< newest entry, or NULL when empty
 };
 
 /// typedefed to ht_enum_t in ht.h for external scope
@@ -51,6 +66,7 @@ struct ht_enum {
     ht_t *ht;
     ht_bucket_t *cur;
     size_t idx;
+    ht_order_t *onode; ///< cursor over the order list for ordered tables
 };
 
 /// Default copy callback.
@@ -63,6 +79,60 @@ static void *__ht_passthrough_copy(const void *v, void *user_data) {
 static void __ht_passthrough_destroy(const void *v, void *user_data) {
     (void)v;
     (void)user_data;
+}
+
+/// Append a new order node for key at the tail of the insertion-order list.
+/// Returns the node, or NULL on allocation failure.
+static ht_order_t *__ht_order_append(ht_t *ht, const void *key) {
+    ht_order_t *node = calloc(1, sizeof(*node));
+    if (!node) {
+        perror("__ht_order_append");
+        return NULL;
+    }
+
+    node->key = key;
+    node->prev = ht->order_tail;
+    if (ht->order_tail) {
+        ht->order_tail->next = node;
+    } else {
+        ht->order_head = node;
+    }
+    ht->order_tail = node;
+
+    return node;
+}
+
+/// Unlink node from the insertion-order list and free it.
+static void __ht_order_unlink(ht_t *ht, ht_order_t *node) {
+    if (!node) {
+        return;
+    }
+
+    if (node->prev) {
+        node->prev->next = node->next;
+    } else {
+        ht->order_head = node->next;
+    }
+
+    if (node->next) {
+        node->next->prev = node->prev;
+    } else {
+        ht->order_tail = node->prev;
+    }
+
+    free(node);
+}
+
+/// Free every order node and reset the list to empty.
+static void __ht_order_clear(ht_t *ht) {
+    ht_order_t *node = ht->order_head;
+    while (node) {
+        ht_order_t *next = node->next;
+        free(node);
+        node = next;
+    }
+    ht->order_head = NULL;
+    ht->order_tail = NULL;
 }
 
 /// Return the table index of a bucket given it's key.
@@ -88,8 +158,12 @@ static size_t __ht_bucket_index(const ht_t *ht, const void *key) {
 ///        If yes, replace the value and we’re done.
 ///        If not we’ll hit the end and create a new node to add to the
 /// chain.
+///
+/// When ordering is on, a brand-new entry gains an order node: a fresh one
+/// appended to the list on a normal insert, or the carried node re-attached
+/// during a rehash (the order list itself is preserved across the rehash).
 static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
-                               bool rehash) {
+                               bool rehash, ht_order_t *carry) {
     ht_bucket_t *cur = NULL, *prev = NULL;
     const size_t idx = __ht_bucket_index(ht, key);
 
@@ -104,6 +178,11 @@ static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
 
         ht->buckets[idx].key = key;
         ht->buckets[idx].val = val;
+
+        if (ht->ordered) {
+            ht->buckets[idx].order =
+                rehash ? carry : __ht_order_append(ht, key);
+        }
 
         if (!rehash) {
             ht->used_buckets++;
@@ -149,6 +228,10 @@ static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
             cur->val = val;
             prev->next = cur;
 
+            if (ht->ordered) {
+                cur->order = rehash ? carry : __ht_order_append(ht, key);
+            }
+
             if (!rehash) {
                 ht->used_buckets++;
             }
@@ -183,13 +266,14 @@ static void __ht_rehash(ht_t *ht) {
             continue;
         }
 
-        __ht_add_to_bucket(ht, buckets[i].key, buckets[i].val, true);
+        __ht_add_to_bucket(ht, buckets[i].key, buckets[i].val, true,
+                           buckets[i].order);
 
         if (buckets[i].next) {
             cur = buckets[i].next;
 
             do {
-                __ht_add_to_bucket(ht, cur->key, cur->val, true);
+                __ht_add_to_bucket(ht, cur->key, cur->val, true, cur->order);
                 next = cur->next;
                 free(cur);
                 cur = next;
@@ -224,6 +308,7 @@ ht_t *ht_create(const ht_options_t *opts) {
     ht->keyeq = opts->keyeq;
     ht->keylen = opts->keylen;
     ht->user_data = opts->user_data;
+    ht->ordered = opts->insertion_ordered;
 
     ht->callbacks.key_copy = __ht_passthrough_copy;
     ht->callbacks.key_free = __ht_passthrough_destroy;
@@ -309,6 +394,8 @@ void ht_destroy(ht_t *ht) {
         }
     }
 
+    __ht_order_clear(ht);
+
     free(ht->buckets);
     ht->buckets = NULL;
     free(ht);
@@ -322,7 +409,7 @@ void ht_insert(ht_t *ht, const void *key, const void *val) {
     }
 
     __ht_rehash(ht);
-    __ht_add_to_bucket(ht, key, val, false);
+    __ht_add_to_bucket(ht, key, val, false, NULL);
 }
 
 /// Remove a bucket from the table.
@@ -348,12 +435,15 @@ void ht_remove(ht_t *ht, const void *key) {
     }
 
     if (ht->keyeq(ht->buckets[idx].key, key)) {
+        ht_order_t *removed = ht->buckets[idx].order;
+
         ht->callbacks.key_free(ht->buckets[idx].key, ht->user_data);
         if (ht->buckets[idx].val) {
             ht->callbacks.val_free(ht->buckets[idx].val, ht->user_data);
         }
         ht->buckets[idx].key = NULL;
         ht->buckets[idx].val = NULL;
+        ht->buckets[idx].order = NULL;
 
         cur = ht->buckets[idx].next;
         if (cur) {
@@ -364,6 +454,17 @@ void ht_remove(ht_t *ht, const void *key) {
                     ht->callbacks.val_copy(cur->val, ht->user_data);
             }
             ht->buckets[idx].next = cur->next;
+
+            /// The promoted entry keeps its order node, but its key was just
+            /// re-copied into the head slot, so the node must point at the new
+            /// copy.
+            if (ht->ordered) {
+                ht->buckets[idx].order = cur->order;
+                if (cur->order) {
+                    cur->order->key = ht->buckets[idx].key;
+                }
+            }
+
             ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
                 ht->callbacks.val_free(cur->val, ht->user_data);
@@ -372,6 +473,10 @@ void ht_remove(ht_t *ht, const void *key) {
             cur->val = NULL;
             free(cur);
             cur = NULL;
+        }
+
+        if (ht->ordered) {
+            __ht_order_unlink(ht, removed);
         }
 
         ht->used_buckets--;
@@ -385,6 +490,9 @@ void ht_remove(ht_t *ht, const void *key) {
     while (cur) {
         if (ht->keyeq(key, cur->key)) {
             prev->next = cur->next;
+            if (ht->ordered) {
+                __ht_order_unlink(ht, cur->order);
+            }
             ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
                 ht->callbacks.val_free(cur->val, ht->user_data);
@@ -506,8 +614,10 @@ void ht_clear(ht_t *ht) {
         ht->buckets[i].key = NULL;
         ht->buckets[i].val = NULL;
         ht->buckets[i].next = NULL;
+        ht->buckets[i].order = NULL;
     }
 
+    __ht_order_clear(ht);
     ht->used_buckets = 0;
 }
 
@@ -586,6 +696,9 @@ ht_enum_t *ht_enum_create(ht_t *ht) {
         return NULL;
     }
     he->ht = ht;
+    if (ht->ordered) {
+        he->onode = ht->order_head;
+    }
 
     return he;
 }
@@ -605,7 +718,7 @@ ht_enum_t *ht_enum_create(ht_t *ht) {
 bool ht_enum_next(ht_enum_t *he, const void **key, const void **val) {
     const void *mykey = NULL, *myval = NULL;
 
-    if (!he || he->idx >= he->ht->capacity) {
+    if (!he) {
         return false;
     }
 
@@ -615,6 +728,27 @@ bool ht_enum_next(ht_enum_t *he, const void **key, const void **val) {
 
     if (!val) {
         val = &myval;
+    }
+
+    /// Ordered tables iterate the insertion-order list and resolve the current
+    /// value by lookup, so a replaced value is reported without disturbing the
+    /// key's original position.
+    if (he->ht->ordered) {
+        if (!he->onode) {
+            return false;
+        }
+
+        void *found = NULL;
+        __ht_get(he->ht, he->onode->key, &found);
+        *key = he->onode->key;
+        *val = found;
+        he->onode = he->onode->next;
+
+        return true;
+    }
+
+    if (he->idx >= he->ht->capacity) {
+        return false;
     }
 
     if (!he->cur) {

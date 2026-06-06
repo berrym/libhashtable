@@ -111,6 +111,7 @@ typedef struct {
     ht_key_mode key_mode;     ///< default HT_KEY_NONE
     const void *key;          ///< HT_KEY_PROVIDED: 16 bytes of key material
     bool key_best_effort; ///< HT_KEY_RANDOM: degrade vs fail on CSPRNG failure
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_options_t;
 
@@ -709,7 +710,9 @@ void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data);
  */
 void ht_stats(const ht_t *ht, ht_stats_t *out);
 
-/* Enumeration. An enumeration object is a cursor over a table's entries. */
+/* Enumeration. An enumeration object is a cursor over a table's entries. A
+ * table built with insertion_ordered enumerates in insertion order; otherwise
+ * the order is unspecified. */
 
 /**
  * @brief Create a cursor over a generic table.
@@ -724,6 +727,8 @@ ht_enum_t *ht_enum_create(ht_t *ht);
  * @param key Out-pointer for the key (may be NULL).
  * @param val Out-pointer for the value (may be NULL).
  * @return true if an entry was returned, false at the end.
+ * @note On an insertion_ordered table entries are returned oldest-first; a
+ *       replaced key keeps its original position with its current value.
  */
 bool ht_enum_next(ht_enum_t *he, const void **key, const void **val);
 
