@@ -19,6 +19,7 @@ extern "C" {
 
 typedef struct ht ht_t;
 typedef struct ht_enum ht_enum_t;
+typedef struct ht_strblob ht_strblob_t;
 typedef struct ht_strdouble ht_strdouble_t;
 typedef struct ht_strfloat ht_strfloat_t;
 typedef struct ht_strint ht_strint_t;
@@ -105,6 +106,8 @@ int ht_random_bytes(void *buf, size_t len);
 // Creation and destruction
 ht_t *ht_create(const ht_options_t *);
 void ht_destroy(ht_t *);
+ht_strblob_t *ht_strblob_create(const ht_str_options_t *);
+void ht_strblob_destroy(ht_strblob_t *);
 ht_strdouble_t *ht_strdouble_create(const ht_str_options_t *);
 void ht_strdouble_destroy(ht_strdouble_t *);
 ht_strfloat_t *ht_strfloat_create(const ht_str_options_t *);
@@ -117,6 +120,8 @@ void ht_strstr_destroy(ht_strstr_t *);
 // Insertion and removal
 void ht_insert(ht_t *, const void *, const void *);
 void ht_remove(ht_t *, const void *);
+void ht_strblob_insert(ht_strblob_t *, const char *, const void *, size_t);
+void ht_strblob_remove(ht_strblob_t *, const char *);
 void ht_strdouble_insert(ht_strdouble_t *, const char *, const double *);
 void ht_strdouble_remove(ht_strdouble_t *, const char *);
 void ht_strfloat_insert(ht_strfloat_t *, const char *, const float *);
@@ -128,6 +133,7 @@ void ht_strstr_remove(ht_strstr_t *, const char *);
 
 // Getting
 void *ht_get(const ht_t *, const void *);
+const void *ht_strblob_get(ht_strblob_t *, const char *, size_t *);
 void *ht_strdouble_get(ht_strdouble_t *, const char *);
 void *ht_strfloat_get(ht_strfloat_t *, const char *);
 void *ht_strint_get(ht_strint_t *, const char *);
@@ -145,6 +151,9 @@ void ht_foreach(const ht_t *, ht_visit, void *);
 ht_enum_t *ht_enum_create(ht_t *);
 bool ht_enum_next(ht_enum_t *, const void **, const void **);
 void ht_enum_destroy(ht_enum_t *);
+ht_enum_t *ht_strblob_enum_create(ht_strblob_t *);
+bool ht_strblob_enum_next(ht_enum_t *, const char **, const void **, size_t *);
+void ht_strblob_enum_destroy(ht_enum_t *);
 ht_enum_t *ht_strdouble_enum_create(ht_strdouble_t *);
 bool ht_strdouble_enum_next(ht_enum_t *, const char **, const double **);
 void ht_strdouble_enum_destroy(ht_enum_t *);

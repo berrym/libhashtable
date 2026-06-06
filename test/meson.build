@@ -54,6 +54,11 @@ test_ht_ops_exe = executable('test_ht_ops',
 			                 include_directories : inc,
 			                 link_with : libhashtable)
 
+test_ht_strblob_exe = executable('test_ht_strblob',
+			                     'ht_strblob_test.c',
+			                     include_directories : inc,
+			                     link_with : libhashtable)
+
 test('libhashtable', test_ht_strstr_exe)
 test('libhashtable', test_ht_strint_exe)
 test('libhashtable', test_ht_strfloat_exe)
@@ -65,3 +70,4 @@ test('libhashtable', test_ht_bulk_exe)
 test('libhashtable', test_ht_siphash_exe)
 test('libhashtable', test_ht_keyed_exe)
 test('libhashtable', test_ht_ops_exe)
+test('libhashtable', test_ht_strblob_exe)

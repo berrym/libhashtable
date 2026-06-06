@@ -7,7 +7,8 @@ libhashtable_sources = ['ht.c',
                         'ht_random.c',
                         'ht_int.c',
                         'ht_bulk.c',
-                        'ht_siphash.c']
+                        'ht_siphash.c',
+                        'ht_strblob.c']
 
 libhashtable_deps = []
 if host_machine.system() == 'windows'
