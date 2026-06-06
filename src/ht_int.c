@@ -1,9 +1,13 @@
-/* ht_int.c - Integer-key hash via the splitmix64 (Stafford Mix13) finalizer.
+/**
+ * @file ht_int.c
+ * @brief Integer-key hash via the splitmix64 (Stafford Mix13) finalizer.
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
