@@ -17,9 +17,6 @@
 
 #include "ht.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 /// Wrapper around ht_create that creates a string->pointer hash table.
 ht_strptr_t *ht_strptr_create(const ht_str_options_t *opts) {
     const ht_str_options_t o = opts ? *opts : (ht_str_options_t){0};
@@ -28,8 +25,7 @@ ht_strptr_t *ht_strptr_create(const ht_str_options_t *opts) {
     }
 
     /// Keys are copied; values are stored as given (passthrough copy/free).
-    const ht_callbacks_t callbacks = {(void *(*)(const void *))strdup,
-                                      (void (*)(const void *))free, NULL, NULL};
+    const ht_callbacks_t callbacks = {str_copy, str_free, NULL, NULL};
 
     const ht_options_t base = {
         .hash = o.flooding_resistant ? ht_hash_siphash

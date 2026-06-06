@@ -16,8 +16,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/// Create a pointer duplicating val.
-static float *__floatdup(const float *val) {
+/// Create a pointer duplicating val (value-copy callback). The user_data
+/// argument is unused.
+static void *__floatdup(const void *val, void *user_data) {
+    (void)user_data;
     float *f = calloc(1, sizeof(float));
     if (!f) {
         perror("__floatdup");
@@ -34,9 +36,7 @@ ht_strfloat_t *ht_strfloat_create(const ht_str_options_t *opts) {
         return NULL;
     }
 
-    const ht_callbacks_t callbacks = {
-        (void *(*)(const void *))strdup, (void (*)(const void *))free,
-        (void *(*)(const void *))__floatdup, (void (*)(const void *))free};
+    const ht_callbacks_t callbacks = {str_copy, str_free, __floatdup, str_free};
 
     const ht_options_t base = {
         .hash = o.flooding_resistant ? ht_hash_siphash

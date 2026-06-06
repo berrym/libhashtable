@@ -20,8 +20,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/// Copy a uint64 key onto the heap (key-copy callback).
-static void *u64_key_copy(const void *key) {
+/// Copy a uint64 key onto the heap (key-copy callback). The user_data argument
+/// is unused.
+static void *u64_key_copy(const void *key, void *user_data) {
+    (void)user_data;
     uint64_t *k = malloc(sizeof(*k));
     if (!k) {
         perror("ht_u64ptr_insert");
@@ -31,8 +33,12 @@ static void *u64_key_copy(const void *key) {
     return k;
 }
 
-/// Free a heap-copied uint64 key (key-free callback).
-static void u64_key_free(const void *key) { free((void *)key); }
+/// Free a heap-copied uint64 key (key-free callback). The user_data argument
+/// is unused.
+static void u64_key_free(const void *key, void *user_data) {
+    (void)user_data;
+    free((void *)key);
+}
 
 /// Compare two uint64 keys (key-equality callback).
 static bool u64_key_eq(const void *a, const void *b) {

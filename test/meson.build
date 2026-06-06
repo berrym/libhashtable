@@ -79,6 +79,11 @@ test_ht_strset_exe = executable('test_ht_strset',
 			                    include_directories : inc,
 			                    link_with : libhashtable)
 
+test_ht_user_data_exe = executable('test_ht_user_data',
+			                       'ht_user_data_test.c',
+			                       include_directories : inc,
+			                       link_with : libhashtable)
+
 test('libhashtable', test_ht_strstr_exe)
 test('libhashtable', test_ht_strint_exe)
 test('libhashtable', test_ht_strfloat_exe)
@@ -95,3 +100,4 @@ test('libhashtable', test_ht_u64ptr_exe)
 test('libhashtable', test_ht_u64blob_exe)
 test('libhashtable', test_ht_strptr_exe)
 test('libhashtable', test_ht_strset_exe)
+test('libhashtable', test_ht_user_data_exe)

@@ -42,6 +42,7 @@ struct ht {
     size_t used_buckets;
     unsigned char hashkey[HT_HASHKEY_MAX];
     bool keyed;
+    void *user_data;
 };
 
 /// typedefed to ht_enum_t in ht.h for external scope
@@ -52,10 +53,16 @@ struct ht_enum {
 };
 
 /// Default copy callback.
-static void *__ht_passthrough_copy(const void *v) { return (void *)v; }
+static void *__ht_passthrough_copy(const void *v, void *user_data) {
+    (void)user_data;
+    return (void *)v;
+}
 
 /// Default destroy callback.
-static void __ht_passthrough_destroy(const void *v) { return; }
+static void __ht_passthrough_destroy(const void *v, void *user_data) {
+    (void)v;
+    (void)user_data;
+}
 
 /// Return the table index of a bucket given it's key.
 static size_t __ht_bucket_index(const ht_t *ht, const void *key) {
@@ -87,10 +94,10 @@ static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
 
     if (!ht->buckets[idx].key) {
         if (!rehash) {
-            key = ht->callbacks.key_copy(key);
+            key = ht->callbacks.key_copy(key, ht->user_data);
 
             if (val) {
-                val = ht->callbacks.val_copy(val);
+                val = ht->callbacks.val_copy(val, ht->user_data);
             }
         }
 
@@ -106,11 +113,11 @@ static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
         do {
             if (ht->keyeq(key, cur->key)) {
                 if (cur->val) {
-                    ht->callbacks.val_free(cur->val);
+                    ht->callbacks.val_free(cur->val, ht->user_data);
                 }
 
                 if (!rehash && val) {
-                    val = ht->callbacks.val_copy(val);
+                    val = ht->callbacks.val_copy(val, ht->user_data);
                 }
 
                 cur->val = val;
@@ -130,10 +137,10 @@ static void __ht_add_to_bucket(ht_t *ht, const void *key, const void *val,
             }
 
             if (!rehash) {
-                key = ht->callbacks.key_copy(key);
+                key = ht->callbacks.key_copy(key, ht->user_data);
 
                 if (val) {
-                    val = ht->callbacks.val_copy(val);
+                    val = ht->callbacks.val_copy(val, ht->user_data);
                 }
             }
 
@@ -214,6 +221,7 @@ ht_t *ht_create(const ht_options_t *opts) {
     ht->hfunc = opts->hash;
     ht->keyeq = opts->keyeq;
     ht->keylen = opts->keylen;
+    ht->user_data = opts->user_data;
 
     ht->callbacks.key_copy = __ht_passthrough_copy;
     ht->callbacks.key_free = __ht_passthrough_destroy;
@@ -281,17 +289,17 @@ void ht_destroy(ht_t *ht) {
             continue;
         }
 
-        ht->callbacks.key_free(ht->buckets[idx].key);
+        ht->callbacks.key_free(ht->buckets[idx].key, ht->user_data);
         if (ht->buckets[idx].val) {
-            ht->callbacks.val_free(ht->buckets[idx].val);
+            ht->callbacks.val_free(ht->buckets[idx].val, ht->user_data);
         }
 
         next = ht->buckets[idx].next;
         while (next) {
             cur = next;
-            ht->callbacks.key_free(cur->key);
+            ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
-                ht->callbacks.val_free(cur->val);
+                ht->callbacks.val_free(cur->val, ht->user_data);
             }
             next = cur->next;
             free(cur);
@@ -338,23 +346,25 @@ void ht_remove(ht_t *ht, const void *key) {
     }
 
     if (ht->keyeq(ht->buckets[idx].key, key)) {
-        ht->callbacks.key_free(ht->buckets[idx].key);
+        ht->callbacks.key_free(ht->buckets[idx].key, ht->user_data);
         if (ht->buckets[idx].val) {
-            ht->callbacks.val_free(ht->buckets[idx].val);
+            ht->callbacks.val_free(ht->buckets[idx].val, ht->user_data);
         }
         ht->buckets[idx].key = NULL;
         ht->buckets[idx].val = NULL;
 
         cur = ht->buckets[idx].next;
         if (cur) {
-            ht->buckets[idx].key = ht->callbacks.key_copy(cur->key);
+            ht->buckets[idx].key =
+                ht->callbacks.key_copy(cur->key, ht->user_data);
             if (cur->val) {
-                ht->buckets[idx].val = ht->callbacks.val_copy(cur->val);
+                ht->buckets[idx].val =
+                    ht->callbacks.val_copy(cur->val, ht->user_data);
             }
             ht->buckets[idx].next = cur->next;
-            ht->callbacks.key_free(cur->key);
+            ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
-                ht->callbacks.val_free(cur->val);
+                ht->callbacks.val_free(cur->val, ht->user_data);
             }
             cur->key = NULL;
             cur->val = NULL;
@@ -373,9 +383,9 @@ void ht_remove(ht_t *ht, const void *key) {
     while (cur) {
         if (ht->keyeq(key, cur->key)) {
             prev->next = cur->next;
-            ht->callbacks.key_free(cur->key);
+            ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
-                ht->callbacks.val_free(cur->val);
+                ht->callbacks.val_free(cur->val, ht->user_data);
             }
             cur->key = NULL;
             cur->val = NULL;
@@ -475,17 +485,17 @@ void ht_clear(ht_t *ht) {
             continue;
         }
 
-        ht->callbacks.key_free(ht->buckets[i].key);
+        ht->callbacks.key_free(ht->buckets[i].key, ht->user_data);
         if (ht->buckets[i].val) {
-            ht->callbacks.val_free(ht->buckets[i].val);
+            ht->callbacks.val_free(ht->buckets[i].val, ht->user_data);
         }
 
         ht_bucket_t *cur = ht->buckets[i].next;
         while (cur) {
             ht_bucket_t *next = cur->next;
-            ht->callbacks.key_free(cur->key);
+            ht->callbacks.key_free(cur->key, ht->user_data);
             if (cur->val) {
-                ht->callbacks.val_free(cur->val);
+                ht->callbacks.val_free(cur->val, ht->user_data);
             }
             free(cur);
             cur = next;

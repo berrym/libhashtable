@@ -12,9 +12,6 @@
 
 #include "ht.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 /// Wrapper aroung ht_create that creates a string->string hash table.
 ht_strstr_t *ht_strstr_create(const ht_str_options_t *opts) {
     const ht_str_options_t o = opts ? *opts : (ht_str_options_t){0};
@@ -22,9 +19,7 @@ ht_strstr_t *ht_strstr_create(const ht_str_options_t *opts) {
         return NULL;
     }
 
-    const ht_callbacks_t callbacks = {
-        (void *(*)(const void *))strdup, (void (*)(const void *))free,
-        (void *(*)(const void *))strdup, (void (*)(const void *))free};
+    const ht_callbacks_t callbacks = {str_copy, str_free, str_copy, str_free};
 
     const ht_options_t base = {
         .hash = o.flooding_resistant ? ht_hash_siphash
