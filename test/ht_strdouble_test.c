@@ -1,9 +1,13 @@
-/* ht_strdouble_test.c - Test program for string->double hashtable.
+/**
+ * @file ht_strdouble_test.c
+ * @brief Test program for string->double hashtable.
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"

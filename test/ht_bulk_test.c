@@ -1,9 +1,13 @@
-/* ht_bulk_test.c - Test program for ht_hash_bulk (wyhash).
+/**
+ * @file ht_bulk_test.c
+ * @brief Test program for ht_hash_bulk (wyhash).
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  *
  * The expected values are reference vectors generated from the upstream
  * wyhash v4.3 (the __uint128_t multiply path), so they verify that the

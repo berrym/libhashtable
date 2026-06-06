@@ -1,11 +1,13 @@
-/* record_store - store packed binary records (string -> blob).
+/**
+ * @file record_store.c
+ * @brief store packed binary records (string -> blob).
  *
  * Demonstrates ht_strblob: a string key maps to an arbitrary byte buffer that
  * may contain embedded NUL bytes (here a packed fixed-size struct with a zero
  * flags byte), which a string-valued table would truncate at the first NUL.
  *
  * Project: libhashtable
- * License: MIT
+ * @license MIT
  */
 
 #include "ht.h"
@@ -15,7 +17,7 @@
 
 typedef struct {
     uint32_t version;
-    uint8_t flags; /* may be 0x00 */
+    uint8_t flags; ///< may be 0x00
     uint16_t length;
 } record_t;
 

@@ -1,9 +1,13 @@
-/* ht_u64blob_test.c - Test program for the uint64->blob hash table.
+/**
+ * @file ht_u64blob_test.c
+ * @brief Test program for the uint64->blob hash table
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
@@ -20,8 +24,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* A binary value with embedded NUL bytes round-trips under an integer key.
-     */
+    /// A binary value with embedded NUL bytes round-trips under an integer key.
     const unsigned char blob[] = {0x00, 0xff, 0x00, 0x42, 0x00};
     ht_u64blob_insert(ht, 7, blob, sizeof(blob));
 
@@ -32,7 +35,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* A large integer key is distinct from a small one. */
+    /// A large integer key is distinct from a small one.
     const unsigned char other[] = {0xaa};
     ht_u64blob_insert(ht, 0x100000007ULL, other, sizeof(other));
     got = ht_u64blob_get(ht, 7, &n);
@@ -41,14 +44,14 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* An absent key returns NULL and zeroes the size. */
+    /// An absent key returns NULL and zeroes the size.
     n = 123;
     if (ht_u64blob_get(ht, 99, &n) != NULL || n != 0) {
         fprintf(stderr, "absent-key lookup wrong\n");
         exit(EXIT_FAILURE);
     }
 
-    /* Replacement updates the stored blob. */
+    /// Replacement updates the stored blob.
     const unsigned char blob2[] = {0x01, 0x02};
     ht_u64blob_insert(ht, 7, blob2, sizeof(blob2));
     got = ht_u64blob_get(ht, 7, &n);
@@ -57,7 +60,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* Enumeration yields each key with its blob and length. */
+    /// Enumeration yields each key with its blob and length.
     ht_enum_t *he = ht_u64blob_enum_create(ht);
     if (!he) {
         ht_u64blob_destroy(ht);

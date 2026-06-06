@@ -1,9 +1,13 @@
-/* ht_keyed_test.c - Test program for keyed-table creation at the base layer.
+/**
+ * @file ht_keyed_test.c
+ * @brief Test program for keyed-table creation at the base layer
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
@@ -17,9 +21,9 @@ int main(void) {
         (void *(*)(const void *))strdup, (void (*)(const void *))free,
         (void *(*)(const void *))strdup, (void (*)(const void *))free};
 
-    /* A SipHash-keyed table created at the base layer works end to end. The
-     * table must pass a non-NULL key to SipHash; if the wiring passed NULL this
-     * would dereference a null pointer. */
+    /// A SipHash-keyed table created at the base layer works end to end. The
+    /// table must pass a non-NULL key to SipHash; if the wiring passed NULL
+    /// this would dereference a null pointer.
     ht_t *ht = ht_create(&(ht_options_t){.hash = ht_hash_siphash,
                                          .keyeq = str_eq,
                                          .keylen = str_len,
@@ -48,8 +52,8 @@ int main(void) {
 
     ht_destroy(ht);
 
-    /* An unkeyed table (FNV-1a, HT_KEY_NONE) also works: the hash receives a
-     * NULL hashkey and ignores it. */
+    /// An unkeyed table (FNV-1a, HT_KEY_NONE) also works: the hash receives a
+    /// NULL hashkey and ignores it.
     ht_t *ht2 = ht_create(&(ht_options_t){.hash = ht_hash_fnv1a,
                                           .keyeq = str_eq,
                                           .keylen = str_len,

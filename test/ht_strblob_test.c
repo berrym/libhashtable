@@ -1,9 +1,13 @@
-/* ht_strblob_test.c - Test program for the string->blob hash table.
+/**
+ * @file ht_strblob_test.c
+ * @brief Test program for the string->blob hash table
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
@@ -19,8 +23,8 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* A value with embedded NUL bytes round-trips in full. This is the reason
-     * ht_strblob exists: ht_strstr would truncate at the first NUL. */
+    /// A value with embedded NUL bytes round-trips in full. This is the reason
+    /// ht_strblob exists: ht_strstr would truncate at the first NUL.
     const unsigned char blob[] = {0xde, 0x00, 0xad, 0x00, 0xbe, 0xef};
     ht_strblob_insert(ht, "k", blob, sizeof(blob));
 
@@ -31,7 +35,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* A zero-length blob is valid. */
+    /// A zero-length blob is valid.
     ht_strblob_insert(ht, "empty", NULL, 0);
     got = ht_strblob_get(ht, "empty", &n);
     if (n != 0) {
@@ -39,14 +43,14 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* An absent key returns NULL and zeroes the size. */
+    /// An absent key returns NULL and zeroes the size.
     n = 123;
     if (ht_strblob_get(ht, "absent", &n) != NULL || n != 0) {
         fprintf(stderr, "absent-key lookup wrong\n");
         exit(EXIT_FAILURE);
     }
 
-    /* Replacing a key frees the old blob and stores the new one. */
+    /// Replacing a key frees the old blob and stores the new one.
     const unsigned char blob2[] = {0x01, 0x02, 0x03};
     ht_strblob_insert(ht, "k", blob2, sizeof(blob2));
     got = ht_strblob_get(ht, "k", &n);
@@ -55,7 +59,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* Enumeration yields each key with its blob and length. */
+    /// Enumeration yields each key with its blob and length.
     ht_enum_t *he = ht_strblob_enum_create(ht);
     if (!he) {
         ht_strblob_destroy(ht);

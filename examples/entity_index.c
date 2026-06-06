@@ -1,4 +1,6 @@
-/* entity_index - map 64-bit handles to records (uint64 -> pointer).
+/**
+ * @file entity_index.c
+ * @brief map 64-bit handles to records (uint64 -> pointer).
  *
  * The flagship demonstration of type-matched hashing. A uint64_t handle keys a
  * record directly, with no stringification: ht_u64ptr hashes the integer with
@@ -7,7 +9,7 @@
  * the caller owns the records.
  *
  * Project: libhashtable
- * License: MIT
+ * @license MIT
  */
 
 #include "ht.h"

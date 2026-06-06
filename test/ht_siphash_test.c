@@ -1,9 +1,13 @@
-/* ht_siphash_test.c - Test program for ht_hash_siphash and ht_hash_siphash24.
+/**
+ * @file ht_siphash_test.c
+ * @brief Test program for ht_hash_siphash and ht_hash_siphash24
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  *
  * The vectors use the standard SipHash test key (bytes 0x00..0x0f) and inputs
  * (byte i = i). The SipHash-2-4 column is the published reference set (the
@@ -57,8 +61,8 @@ int main(void) {
         }
     }
 
-    /* Keyed behavior: a fixed key is deterministic, and two distinct random
-     * keys produce different hashes of the same input. */
+    /// Keyed behavior: a fixed key is deterministic, and two distinct random
+    /// keys produce different hashes of the same input.
     unsigned char k1[16], k2[16];
     const char *msg = "the quick brown fox";
     size_t mlen = strlen(msg);

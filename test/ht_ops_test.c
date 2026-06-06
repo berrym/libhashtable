@@ -1,9 +1,13 @@
-/* ht_ops_test.c - Test program for the compound table operations.
+/**
+ * @file ht_ops_test.c
+ * @brief Test program for the compound table operations
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
@@ -48,21 +52,21 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* get_or_insert returns the existing value and does not overwrite. */
+    /// get_or_insert returns the existing value and does not overwrite.
     const char *v = ht_get_or_insert(ht, "a", "OVERWRITE");
     if (!v || strcmp(v, "1") != 0 || strcmp(ht_get(ht, "a"), "1") != 0) {
         fprintf(stderr, "ht_get_or_insert overwrote an existing key\n");
         exit(EXIT_FAILURE);
     }
 
-    /* get_or_insert inserts an absent key and returns the new value. */
+    /// get_or_insert inserts an absent key and returns the new value.
     v = ht_get_or_insert(ht, "c", "3");
     if (!v || strcmp(v, "3") != 0 || ht_size(ht) != 3) {
         fprintf(stderr, "ht_get_or_insert did not insert\n");
         exit(EXIT_FAILURE);
     }
 
-    /* upsert reports newly-added vs replaced. */
+    /// upsert reports newly-added vs replaced.
     if (!ht_upsert(ht, "d", "4")) {
         fprintf(stderr, "ht_upsert of a new key should return true\n");
         exit(EXIT_FAILURE);
@@ -73,7 +77,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* foreach visits every entry exactly once. */
+    /// foreach visits every entry exactly once.
     size_t n = 0;
     ht_foreach(ht, count_visit, &n);
     if (n != ht_size(ht)) {
@@ -82,7 +86,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* clear empties the table but leaves it reusable. */
+    /// clear empties the table but leaves it reusable.
     ht_clear(ht);
     if (ht_size(ht) != 0 || ht_contains(ht, "a")) {
         fprintf(stderr, "ht_clear did not empty the table\n");

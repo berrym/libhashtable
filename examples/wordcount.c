@@ -1,4 +1,6 @@
-/* wordcount - count word frequencies from stdin (string -> int).
+/**
+ * @file wordcount.c
+ * @brief count word frequencies from stdin (string -> int).
  *
  * Demonstrates ht_strint: short, trusted text keys map to integer counts. The
  * default hash is FNV-1a, which suits short string keys. ht_strint_get returns
@@ -6,7 +8,7 @@
  * place.
  *
  * Project: libhashtable
- * License: MIT
+ * @license MIT
  */
 
 #include "ht.h"

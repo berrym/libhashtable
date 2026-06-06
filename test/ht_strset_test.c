@@ -1,9 +1,13 @@
-/* ht_strset_test.c - Test program for the string set.
+/**
+ * @file ht_strset_test.c
+ * @brief Test program for the string set
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  */
 
 #include "ht.h"
@@ -18,7 +22,7 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* add reports newly-added vs already-present. */
+    /// add reports newly-added vs already-present.
     if (!ht_strset_add(s, "alpha")) {
         fprintf(stderr, "adding a new member should return true\n");
         exit(EXIT_FAILURE);
@@ -29,7 +33,7 @@ int main(void) {
     }
     ht_strset_add(s, "beta");
 
-    /* contains reflects membership. */
+    /// contains reflects membership.
     if (!ht_strset_contains(s, "alpha") || !ht_strset_contains(s, "beta")) {
         fprintf(stderr, "contains missed a present member\n");
         exit(EXIT_FAILURE);
@@ -39,14 +43,14 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    /* remove drops a member. */
+    /// remove drops a member.
     ht_strset_remove(s, "alpha");
     if (ht_strset_contains(s, "alpha")) {
         fprintf(stderr, "remove failed\n");
         exit(EXIT_FAILURE);
     }
 
-    /* enumeration yields the remaining members. */
+    /// enumeration yields the remaining members.
     ht_enum_t *he = ht_strset_enum_create(s);
     if (!he) {
         ht_strset_destroy(s);

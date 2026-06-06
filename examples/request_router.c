@@ -1,4 +1,6 @@
-/* request_router - route untrusted path keys with flooding resistance.
+/**
+ * @file request_router.c
+ * @brief route untrusted path keys with flooding resistance.
  *
  * Demonstrates the security tier of the menu. The keys are untrusted request
  * paths, so the table is created flooding_resistant, which selects keyed
@@ -7,7 +9,7 @@
  * has no entropy source.
  *
  * Project: libhashtable
- * License: MIT
+ * @license MIT
  */
 
 #include "ht.h"
