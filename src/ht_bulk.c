@@ -8,7 +8,7 @@
 
 #include "ht.h"
 
-#include "wyhash.h"
+#include "vendor/wyhash.h"
 
 /// Hash a key of arbitrary length with wyhash, using a fixed zero seed and the
 /// default secret. Suited to long strings and binary blobs. The hashkey

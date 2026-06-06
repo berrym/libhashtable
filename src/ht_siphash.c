@@ -8,7 +8,7 @@
 
 #include "ht.h"
 
-#include "siphash.h"
+#include "vendor/siphash.h"
 
 /// SipHash-1-3 keyed hash. hashkey must point to a 16-byte key. Suited to
 /// untrusted keys: when keyed with random material it resists the collision
