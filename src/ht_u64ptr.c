@@ -1,9 +1,13 @@
-/* ht_u64ptr.c - Type-wrapped uint64->pointer hash table.
+/**
+ * @file ht_u64ptr.c
+ * @brief Type-wrapped uint64->pointer hash table.
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  *
  * Maps a 64-bit integer key to an opaque, caller-owned pointer value. The key
  * is hashed directly with the integer finalizer rather than being stringified
@@ -41,10 +45,7 @@ static size_t u64_key_len(const void *key) {
     return sizeof(uint64_t);
 }
 
-/**
- * ht_u64ptr_create:
- *      Wrapper around ht_create that creates a uint64->pointer hash table.
- */
+/// Wrapper around ht_create that creates a uint64->pointer hash table.
 ht_u64ptr_t *ht_u64ptr_create(const ht_u64_options_t *opts) {
     const ht_u64_options_t o = opts ? *opts : (ht_u64_options_t){0};
 
@@ -64,48 +65,30 @@ ht_u64ptr_t *ht_u64ptr_create(const ht_u64_options_t *opts) {
     return (ht_u64ptr_t *)ht_create(&base);
 }
 
-/**
- * ht_u64ptr_destroy:
- *      Wrapper around ht_destroy for a uint64->pointer hash table.
- */
+/// Wrapper around ht_destroy for a uint64->pointer hash table.
 void ht_u64ptr_destroy(ht_u64ptr_t *ht) { ht_destroy((ht_t *)ht); }
 
-/**
- * ht_u64ptr_insert:
- *      Insert a uint64 key mapping to a caller-owned pointer value.
- */
+/// Insert a uint64 key mapping to a caller-owned pointer value.
 void ht_u64ptr_insert(ht_u64ptr_t *ht, uint64_t key, void *val) {
     ht_insert((ht_t *)ht, &key, val);
 }
 
-/**
- * ht_u64ptr_remove:
- *      Remove the entry for a uint64 key.
- */
+/// Remove the entry for a uint64 key.
 void ht_u64ptr_remove(ht_u64ptr_t *ht, uint64_t key) {
     ht_remove((ht_t *)ht, &key);
 }
 
-/**
- * ht_u64ptr_get:
- *      Return the pointer stored under a uint64 key, or NULL if absent.
- */
+/// Return the pointer stored under a uint64 key, or NULL if absent.
 void *ht_u64ptr_get(ht_u64ptr_t *ht, uint64_t key) {
     return ht_get((ht_t *)ht, &key);
 }
 
-/**
- * ht_u64ptr_enum_create:
- *      Wrapper around ht_enum_create for a uint64->pointer hash table.
- */
+/// Wrapper around ht_enum_create for a uint64->pointer hash table.
 ht_enum_t *ht_u64ptr_enum_create(ht_u64ptr_t *ht) {
     return ht_enum_create((ht_t *)ht);
 }
 
-/**
- * ht_u64ptr_enum_next:
- *      Return the next key/value pair. The value aliases the stored pointer.
- */
+/// Return the next key/value pair. The value aliases the stored pointer.
 bool ht_u64ptr_enum_next(ht_enum_t *he, uint64_t *key, void **val) {
     const void *kp = NULL;
     const void *vp = NULL;
@@ -122,8 +105,5 @@ bool ht_u64ptr_enum_next(ht_enum_t *he, uint64_t *key, void **val) {
     return true;
 }
 
-/**
- * ht_u64ptr_enum_destroy:
- *      Wrapper around ht_enum_destroy for a uint64->pointer enumeration object.
- */
+/// Wrapper around ht_enum_destroy for a uint64->pointer enumeration object.
 void ht_u64ptr_enum_destroy(ht_enum_t *he) { ht_enum_destroy(he); }

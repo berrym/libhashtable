@@ -1,9 +1,13 @@
-/* ht_strblob.c - Type-wrapped string->binary-blob hash table.
+/**
+ * @file ht_strblob.c
+ * @brief Type-wrapped string->binary-blob hash table.
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  *
  * Stores arbitrary binary data, including embedded NUL bytes, under a string
  * key with explicit length tracking. Use this in place of ht_strstr when a
@@ -59,10 +63,7 @@ static void blob_free(const void *blob) {
     free((void *)b);
 }
 
-/**
- * ht_strblob_create:
- *      Wrapper around ht_create that creates a string->blob hash table.
- */
+/// Wrapper around ht_create that creates a string->blob hash table.
 ht_strblob_t *ht_strblob_create(const ht_str_options_t *opts) {
     const ht_str_options_t o = opts ? *opts : (ht_str_options_t){0};
     if (o.case_insensitive && o.flooding_resistant) {
@@ -88,37 +89,25 @@ ht_strblob_t *ht_strblob_create(const ht_str_options_t *opts) {
     return (ht_strblob_t *)ht_create(&base);
 }
 
-/**
- * ht_strblob_destroy:
- *      Wrapper around ht_destroy that destroys a string->blob hash table.
- */
+/// Wrapper around ht_destroy that destroys a string->blob hash table.
 void ht_strblob_destroy(ht_strblob_t *ht) { ht_destroy((ht_t *)ht); }
 
-/**
- * ht_strblob_insert:
- *      Insert a key/blob pair. The table deep-copies both the key and the blob
- * bytes; the caller retains ownership of its input buffer. size may be 0.
- */
+/// Insert a key/blob pair. The table deep-copies both the key and the blob
+/// bytes; the caller retains ownership of its input buffer. size may be 0.
 void ht_strblob_insert(ht_strblob_t *ht, const char *key, const void *data,
                        size_t size) {
     const ht_blob_t blob = {(void *)data, size};
     ht_insert((ht_t *)ht, (void *)key, &blob);
 }
 
-/**
- * ht_strblob_remove:
- *      Wrapper around ht_remove for a string->blob hash table.
- */
+/// Wrapper around ht_remove for a string->blob hash table.
 void ht_strblob_remove(ht_strblob_t *ht, const char *key) {
     ht_remove((ht_t *)ht, (void *)key);
 }
 
-/**
- * ht_strblob_get:
- *      Look up the blob stored under a key. The returned pointer aliases the
- * table's storage and must not be freed. out_size, if non-NULL, receives the
- * blob length, or 0 when the key is absent.
- */
+/// Look up the blob stored under a key. The returned pointer aliases the
+/// table's storage and must not be freed. out_size, if non-NULL, receives the
+/// blob length, or 0 when the key is absent.
 const void *ht_strblob_get(ht_strblob_t *ht, const char *key,
                            size_t *out_size) {
     const ht_blob_t *blob = ht_get((ht_t *)ht, (void *)key);
@@ -134,19 +123,13 @@ const void *ht_strblob_get(ht_strblob_t *ht, const char *key,
     return blob->data;
 }
 
-/**
- * ht_strblob_enum_create:
- *      Wrapper around ht_enum_create for a string->blob hash table.
- */
+/// Wrapper around ht_enum_create for a string->blob hash table.
 ht_enum_t *ht_strblob_enum_create(ht_strblob_t *ht) {
     return ht_enum_create((ht_t *)ht);
 }
 
-/**
- * ht_strblob_enum_next:
- *      Return the next key/blob pair. The pointers written through key, data,
- * and size alias the table's storage and must not be freed.
- */
+/// Return the next key/blob pair. The pointers written through key, data,
+/// and size alias the table's storage and must not be freed.
 bool ht_strblob_enum_next(ht_enum_t *he, const char **key, const void **data,
                           size_t *size) {
     const void *raw_val = NULL;
@@ -164,8 +147,5 @@ bool ht_strblob_enum_next(ht_enum_t *he, const char **key, const void **data,
     return true;
 }
 
-/**
- * ht_strblob_enum_destroy:
- *      Wrapper around ht_enum_destroy for a string->blob enumeration object.
- */
+/// Wrapper around ht_enum_destroy for a string->blob enumeration object.
 void ht_strblob_enum_destroy(ht_enum_t *he) { ht_enum_destroy(he); }

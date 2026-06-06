@@ -1,9 +1,13 @@
-/* ht_u64blob.c - Type-wrapped uint64->binary-blob hash table.
+/**
+ * @file ht_u64blob.c
+ * @brief Type-wrapped uint64->binary-blob hash table.
  *
  * Project: libhashtable
  * URL: https://github.com/berrym/libhashtable
- * License: MIT
- * Copyright (c) Michael Berry <trismegustis@gmail.com> 2024
+ *
+ * @author Michael Berry <trismegustis@gmail.com>
+ * @copyright Copyright (c) 2024 Michael Berry
+ * @license MIT
  *
  * Maps a 64-bit integer key to an arbitrary binary value (including embedded
  * NUL bytes) with explicit length tracking. The key is hashed directly with
@@ -82,10 +86,7 @@ static void blob_free(const void *blob) {
     free((void *)b);
 }
 
-/**
- * ht_u64blob_create:
- *      Wrapper around ht_create that creates a uint64->blob hash table.
- */
+/// Wrapper around ht_create that creates a uint64->blob hash table.
 ht_u64blob_t *ht_u64blob_create(const ht_u64_options_t *opts) {
     const ht_u64_options_t o = opts ? *opts : (ht_u64_options_t){0};
 
@@ -105,37 +106,25 @@ ht_u64blob_t *ht_u64blob_create(const ht_u64_options_t *opts) {
     return (ht_u64blob_t *)ht_create(&base);
 }
 
-/**
- * ht_u64blob_destroy:
- *      Wrapper around ht_destroy for a uint64->blob hash table.
- */
+/// Wrapper around ht_destroy for a uint64->blob hash table.
 void ht_u64blob_destroy(ht_u64blob_t *ht) { ht_destroy((ht_t *)ht); }
 
-/**
- * ht_u64blob_insert:
- *      Insert a uint64 key mapping to a deep copy of size bytes at data. The
- * caller retains ownership of its input buffer; size may be 0.
- */
+/// Insert a uint64 key mapping to a deep copy of size bytes at data. The
+/// caller retains ownership of its input buffer; size may be 0.
 void ht_u64blob_insert(ht_u64blob_t *ht, uint64_t key, const void *data,
                        size_t size) {
     const ht_blob_t blob = {(void *)data, size};
     ht_insert((ht_t *)ht, &key, &blob);
 }
 
-/**
- * ht_u64blob_remove:
- *      Remove the entry for a uint64 key.
- */
+/// Remove the entry for a uint64 key.
 void ht_u64blob_remove(ht_u64blob_t *ht, uint64_t key) {
     ht_remove((ht_t *)ht, &key);
 }
 
-/**
- * ht_u64blob_get:
- *      Look up the blob stored under a uint64 key. The returned pointer aliases
- * the table's storage and must not be freed. out_size, if non-NULL, receives
- * the blob length, or 0 when the key is absent.
- */
+/// Look up the blob stored under a uint64 key. The returned pointer aliases
+/// the table's storage and must not be freed. out_size, if non-NULL, receives
+/// the blob length, or 0 when the key is absent.
 const void *ht_u64blob_get(ht_u64blob_t *ht, uint64_t key, size_t *out_size) {
     const ht_blob_t *blob = ht_get((ht_t *)ht, &key);
     if (!blob) {
@@ -150,19 +139,13 @@ const void *ht_u64blob_get(ht_u64blob_t *ht, uint64_t key, size_t *out_size) {
     return blob->data;
 }
 
-/**
- * ht_u64blob_enum_create:
- *      Wrapper around ht_enum_create for a uint64->blob hash table.
- */
+/// Wrapper around ht_enum_create for a uint64->blob hash table.
 ht_enum_t *ht_u64blob_enum_create(ht_u64blob_t *ht) {
     return ht_enum_create((ht_t *)ht);
 }
 
-/**
- * ht_u64blob_enum_next:
- *      Return the next key/blob pair. The data pointer aliases the table's
- * storage and must not be freed.
- */
+/// Return the next key/blob pair. The data pointer aliases the table's
+/// storage and must not be freed.
 bool ht_u64blob_enum_next(ht_enum_t *he, uint64_t *key, const void **data,
                           size_t *size) {
     const void *kp = NULL;
@@ -184,8 +167,5 @@ bool ht_u64blob_enum_next(ht_enum_t *he, uint64_t *key, const void **data,
     return true;
 }
 
-/**
- * ht_u64blob_enum_destroy:
- *      Wrapper around ht_enum_destroy for a uint64->blob enumeration object.
- */
+/// Wrapper around ht_enum_destroy for a uint64->blob enumeration object.
 void ht_u64blob_enum_destroy(ht_enum_t *he) { ht_enum_destroy(he); }
