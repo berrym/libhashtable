@@ -313,6 +313,18 @@ These are independent and will be taken one at a time, highest-priority first.
    `ht_u64ptr`/`ht_u64blob` -> `ht_strptr` -> `ht_strset`. The substantive ask is
    not order but runnable demos — see §12.
 
+8. Base-layer key length — how does `len` reach the hash, given the engine
+   currently assumes NUL-terminated keys?
+   RESOLVED 2026-06-04: Option B — a `size_t (*keylen)(const void *key)` callback
+   supplied at `ht_create`, used solely to feed the hash. `ht_insert`/`ht_get`/
+   `ht_remove`, `keyeq`, `key_copy`, `key_free` keep their current signatures; no
+   per-entry length is stored. Covers strings (`strlen`) and every fixed-size key
+   (constant `sizeof`) — the full set of audited shapes. Naked variable-length
+   binary keys must encode their own length (e.g. a flexible-array
+   `{size_t len; char data[];}` key with a trivial keylen), which is an
+   application-layer concern, not an engine change. Explicit-length base entry
+   points may be added additively later if a real consumer needs them.
+
 ## 11. Suggested sequencing
 
 Grouped by technical scope, not by release ceremony:

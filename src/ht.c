@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <string.h>
 
 #define INITIAL_BUCKETS (16) // Initial table size
 #define MAX_LOAD_FACTOR                                                        \
@@ -18,7 +18,8 @@
 #define MAX_CAPACITY                                                           \
     (1 << 31) // Maximum capacity of table when it should not grow and rehash
               // (2147483648)
-#define GROWTH_FACTOR (2) // Factor by which a table's capacity should grow
+#define GROWTH_FACTOR (2)   // Factor by which a table's capacity should grow
+#define HT_HASHKEY_MAX (16) // Key buffer size for keyed hashes (SipHash key)
 
 typedef struct ht_bucket {
     const void *key;
@@ -29,11 +30,13 @@ typedef struct ht_bucket {
 struct ht { // typedefed to ht_t in ht.h for external scope
     ht_hash hfunc;
     ht_keyeq keyeq;
+    ht_keylen keylen;
     ht_callbacks_t callbacks;
     ht_bucket_t *buckets;
     size_t capacity;
     size_t used_buckets;
-    ht_hash_t seed;
+    unsigned char hashkey[HT_HASHKEY_MAX];
+    bool keyed;
 };
 
 struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
@@ -41,29 +44,6 @@ struct ht_enum { // typedefed to ht_enum_t in ht.h for external scope
     ht_bucket_t *cur;
     size_t idx;
 };
-
-/**
- * __random_seed:
- *      Generate a random hash offset.
- */
-static void __random_seed(ht_t *ht) {
-#if HT_HASH_WIDTH == 32
-    uint32_t seed = (uint32_t)time(NULL);
-    seed ^= ((uint32_t)ht_create << 16) | (uint32_t)&ht;
-    seed ^= (uint32_t)&ht;
-#else
-    uint64_t seed = (uint64_t)time(NULL);
-    seed ^= ((uint64_t)ht_create << 32) | (uint64_t)&ht;
-    seed ^= (uint64_t)&ht;
-#endif
-    ht->seed = seed;
-}
-
-/**
- * __default_seed:
- *      Use a default hash offset for FNV1A algorithm.
- */
-static void __default_seed(ht_t *ht) { ht->seed = FNV1A_OFFSET; }
 
 /**
  * __ht_passthrough_copy:
@@ -82,7 +62,8 @@ static void __ht_passthrough_destroy(const void *v) { return; }
  *      Return the table index of a bucket given it's key.
  */
 static size_t __ht_bucket_index(const ht_t *ht, const void *key) {
-    return ht->hfunc(key, ht->seed) % ht->capacity;
+    return ht->hfunc(key, ht->keylen(key), ht->keyed ? ht->hashkey : NULL) %
+           ht->capacity;
 }
 
 /**
@@ -226,11 +207,13 @@ static void __ht_rehash(ht_t *ht) {
  * function, a key equality comparison function, and optionally bucket
  * operations function callbacks structure.
  */
-ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
-                const ht_callbacks_t *callbacks, const unsigned int flags) {
+ht_t *ht_create(const ht_options_t *opts) {
     ht_t *ht = NULL;
 
-    if (!hfunc || !keyeq) {
+    if (!opts || !opts->hash || !opts->keyeq || !opts->keylen) {
+        return NULL;
+    }
+    if (opts->key_mode == HT_KEY_PROVIDED && !opts->key) {
         return NULL;
     }
 
@@ -240,40 +223,58 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
         return NULL;
     }
 
-    ht->hfunc = hfunc;
-    ht->keyeq = keyeq;
+    ht->hfunc = opts->hash;
+    ht->keyeq = opts->keyeq;
+    ht->keylen = opts->keylen;
 
     ht->callbacks.key_copy = __ht_passthrough_copy;
     ht->callbacks.key_free = __ht_passthrough_destroy;
     ht->callbacks.val_copy = __ht_passthrough_copy;
     ht->callbacks.val_free = __ht_passthrough_destroy;
 
-    if (callbacks) {
-        if (callbacks->key_copy) {
-            ht->callbacks.key_copy = callbacks->key_copy;
-        }
-        if (callbacks->key_free) {
-            ht->callbacks.key_free = callbacks->key_free;
-        }
-        if (callbacks->val_copy) {
-            ht->callbacks.val_copy = callbacks->val_copy;
-        }
-        if (callbacks->val_free) {
-            ht->callbacks.val_free = callbacks->val_free;
-        }
+    if (opts->callbacks.key_copy) {
+        ht->callbacks.key_copy = opts->callbacks.key_copy;
+    }
+    if (opts->callbacks.key_free) {
+        ht->callbacks.key_free = opts->callbacks.key_free;
+    }
+    if (opts->callbacks.val_copy) {
+        ht->callbacks.val_copy = opts->callbacks.val_copy;
+    }
+    if (opts->callbacks.val_free) {
+        ht->callbacks.val_free = opts->callbacks.val_free;
     }
 
-    ht->capacity = INITIAL_BUCKETS;
+    ht->capacity =
+        opts->initial_capacity ? opts->initial_capacity : INITIAL_BUCKETS;
     ht->buckets = calloc(ht->capacity, sizeof(*ht->buckets));
     if (!ht->buckets) {
         perror("ht_create");
+        free(ht);
         return NULL;
     }
 
-    if (flags & HT_SEED_RANDOM) {
-        __random_seed(ht);
-    } else {
-        __default_seed(ht);
+    switch (opts->key_mode) {
+    case HT_KEY_NONE:
+        break;
+    case HT_KEY_PROVIDED:
+        memcpy(ht->hashkey, opts->key, HT_HASHKEY_MAX);
+        ht->keyed = true;
+        break;
+    case HT_KEY_RANDOM:
+        if (ht_random_bytes(ht->hashkey, HT_HASHKEY_MAX) == 0) {
+            ht->keyed = true;
+        } else if (opts->key_best_effort) {
+            /// Entropy unavailable: proceed with the zeroed key buffer. The
+            /// table is usable but a keyed hash is not flooding-resistant.
+            ht->keyed = true;
+        } else {
+            /// Fail closed: a keyed table was requested but the CSPRNG failed.
+            free(ht->buckets);
+            free(ht);
+            return NULL;
+        }
+        break;
     }
 
     return ht;
@@ -447,6 +448,120 @@ void *ht_get(const ht_t *ht, const void *key) {
     void *val = NULL;
     __ht_get(ht, key, &val);
     return val;
+}
+
+/**
+ * ht_size:
+ *      Return the number of entries currently stored in the table.
+ */
+size_t ht_size(const ht_t *ht) { return ht ? ht->used_buckets : 0; }
+
+/**
+ * ht_contains:
+ *      Return whether a key is present. Unlike comparing ht_get against NULL,
+ * this distinguishes an absent key from a key stored with a NULL value.
+ */
+bool ht_contains(const ht_t *ht, const void *key) {
+    void *val = NULL;
+    return __ht_get(ht, key, &val);
+}
+
+/**
+ * ht_get_or_insert:
+ *      Return the value stored under key, first inserting the key/value pair if
+ * the key is absent. A single call avoids the time-of-check-to-time-of-use gap
+ * of a separate get followed by an insert.
+ */
+void *ht_get_or_insert(ht_t *ht, const void *key, const void *val) {
+    if (!ht || !key) {
+        return NULL;
+    }
+
+    void *existing = NULL;
+    if (__ht_get(ht, key, &existing)) {
+        return existing;
+    }
+
+    ht_insert(ht, key, val);
+    __ht_get(ht, key, &existing);
+    return existing;
+}
+
+/**
+ * ht_upsert:
+ *      Insert a key/value pair, replacing any existing value. Returns true if
+ * the key was newly added and false if an existing value was replaced.
+ */
+bool ht_upsert(ht_t *ht, const void *key, const void *val) {
+    if (!ht || !key) {
+        return false;
+    }
+
+    const bool existed = ht_contains(ht, key);
+    ht_insert(ht, key, val);
+    return !existed;
+}
+
+/**
+ * ht_clear:
+ *      Remove every entry, freeing keys and values through the callbacks, while
+ * keeping the table allocated and reusable.
+ */
+void ht_clear(ht_t *ht) {
+    if (!ht) {
+        return;
+    }
+
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (!ht->buckets[i].key) {
+            continue;
+        }
+
+        ht->callbacks.key_free(ht->buckets[i].key);
+        if (ht->buckets[i].val) {
+            ht->callbacks.val_free(ht->buckets[i].val);
+        }
+
+        ht_bucket_t *cur = ht->buckets[i].next;
+        while (cur) {
+            ht_bucket_t *next = cur->next;
+            ht->callbacks.key_free(cur->key);
+            if (cur->val) {
+                ht->callbacks.val_free(cur->val);
+            }
+            free(cur);
+            cur = next;
+        }
+
+        ht->buckets[i].key = NULL;
+        ht->buckets[i].val = NULL;
+        ht->buckets[i].next = NULL;
+    }
+
+    ht->used_buckets = 0;
+}
+
+/**
+ * ht_foreach:
+ *      Invoke visit(key, val, user_data) for every entry. The table must not be
+ * modified during the iteration.
+ */
+void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data) {
+    if (!ht || !visit) {
+        return;
+    }
+
+    for (size_t i = 0; i < ht->capacity; i++) {
+        if (!ht->buckets[i].key) {
+            continue;
+        }
+
+        visit(ht->buckets[i].key, ht->buckets[i].val, user_data);
+        for (const ht_bucket_t *cur = ht->buckets[i].next; cur;
+             cur = cur->next) {
+            visit(cur->key, cur->val, user_data);
+        }
+    }
 }
 
 /**
