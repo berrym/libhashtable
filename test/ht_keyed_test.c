@@ -20,9 +20,13 @@ int main(void) {
     /* A SipHash-keyed table created at the base layer works end to end. The
      * table must pass a non-NULL key to SipHash; if the wiring passed NULL this
      * would dereference a null pointer. */
-    ht_t *ht = ht_create(ht_hash_siphash, str_eq, str_len, &cb, HT_SEED_RANDOM);
+    ht_t *ht = ht_create(&(ht_options_t){.hash = ht_hash_siphash,
+                                         .keyeq = str_eq,
+                                         .keylen = str_len,
+                                         .callbacks = cb,
+                                         .key_mode = HT_KEY_RANDOM});
     if (!ht) {
-        fprintf(stderr, "ht_create with SipHash + HT_SEED_RANDOM failed\n");
+        fprintf(stderr, "ht_create with SipHash + HT_KEY_RANDOM failed\n");
         exit(EXIT_FAILURE);
     }
 
@@ -44,9 +48,12 @@ int main(void) {
 
     ht_destroy(ht);
 
-    /* An unkeyed table (FNV-1a, no HT_SEED_RANDOM) also works: the hash
-     * receives a NULL hashkey and ignores it. */
-    ht_t *ht2 = ht_create(ht_hash_fnv1a, str_eq, str_len, &cb, HT_STR_NONE);
+    /* An unkeyed table (FNV-1a, HT_KEY_NONE) also works: the hash receives a
+     * NULL hashkey and ignores it. */
+    ht_t *ht2 = ht_create(&(ht_options_t){.hash = ht_hash_fnv1a,
+                                          .keyeq = str_eq,
+                                          .keylen = str_len,
+                                          .callbacks = cb});
     if (!ht2) {
         fprintf(stderr, "ht_create unkeyed failed\n");
         exit(EXIT_FAILURE);

@@ -15,19 +15,29 @@
  * ht_strstr_create:
  *      Wrapper aroung ht_create that creates a string->string hash table.
  */
-ht_strstr_t *ht_strstr_create(unsigned int flags) {
-    ht_hash hash = ht_hash_fnv1a;
-    ht_keyeq keyeq = str_eq;
+ht_strstr_t *ht_strstr_create(const ht_str_options_t *opts) {
+    const ht_str_options_t o = opts ? *opts : (ht_str_options_t){0};
+    if (o.case_insensitive && o.flooding_resistant) {
+        return NULL;
+    }
+
     const ht_callbacks_t callbacks = {
         (void *(*)(const void *))strdup, (void (*)(const void *))free,
         (void *(*)(const void *))strdup, (void (*)(const void *))free};
 
-    if (flags & HT_STR_CASECMP) {
-        hash = ht_hash_fnv1a_casecmp;
-        keyeq = str_caseeq;
-    }
+    const ht_options_t base = {
+        .hash = o.flooding_resistant ? ht_hash_siphash
+                : o.case_insensitive ? ht_hash_fnv1a_casecmp
+                                     : ht_hash_fnv1a,
+        .keyeq = o.case_insensitive ? str_caseeq : str_eq,
+        .keylen = str_len,
+        .callbacks = callbacks,
+        .key_mode = o.flooding_resistant ? HT_KEY_RANDOM : HT_KEY_NONE,
+        .key_best_effort = o.best_effort,
+        .initial_capacity = o.initial_capacity,
+    };
 
-    return (ht_strstr_t *)ht_create(hash, keyeq, str_len, &callbacks, flags);
+    return (ht_strstr_t *)ht_create(&base);
 }
 
 /**

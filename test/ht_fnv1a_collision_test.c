@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     char t1[64] = {'\0'};
     char t2[64] = {'\0'};
 
-    ht = ht_strstr_create(HT_STR_NONE);
+    ht = ht_strstr_create(NULL);
     if (!ht) {
         exit(EXIT_FAILURE);
     }

@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     char t1[64] = {'\0'};
     char t2[64] = {'\0'};
 
-    ht = ht_strstr_create(HT_STR_CASECMP | HT_SEED_RANDOM);
+    ht = ht_strstr_create(&(ht_str_options_t){.case_insensitive = true});
     if (!ht) {
         exit(EXIT_FAILURE);
     }

@@ -25,11 +25,10 @@ typedef struct ht_strint ht_strint_t;
 typedef struct ht_strstr ht_strstr_t;
 
 typedef enum {
-    HT_STR_NONE = 0,
-    HT_STR_CASECMP = 1,
-    HT_SEED_RANDOM = 2,
-    HT_SEED_BEST_EFFORT = 4,
-} ht_flags_enum_t;
+    HT_KEY_NONE = 0, ///< unkeyed hash; hashkey is NULL
+    HT_KEY_RANDOM,   ///< per-table key generated from the CSPRNG
+    HT_KEY_PROVIDED, ///< caller supplies the 16-byte key material
+} ht_key_mode;
 
 /* Hash values are unconditionally 64-bit. */
 typedef uint64_t ht_hash_t;
@@ -50,6 +49,30 @@ typedef struct {
     ht_vcopy val_copy;
     ht_vfree val_free;
 } ht_callbacks_t;
+
+/// Construction options. Zero-initialized fields take defaults: passthrough
+/// callbacks, HT_KEY_NONE, and the default initial capacity.
+typedef struct {
+    ht_hash hash;             ///< required
+    ht_keyeq keyeq;           ///< required
+    ht_keylen keylen;         ///< required
+    ht_callbacks_t callbacks; ///< zero-initialized => passthrough
+    ht_key_mode key_mode;     ///< default HT_KEY_NONE
+    const void *key;          ///< HT_KEY_PROVIDED: 16 bytes of key material
+    bool key_best_effort; ///< HT_KEY_RANDOM: degrade vs fail on CSPRNG failure
+    size_t initial_capacity; ///< 0 => default
+} ht_options_t;
+
+/// Construction options for the string-keyed typed wrappers. case_insensitive
+/// and flooding_resistant are mutually exclusive (SipHash has no case-folding
+/// variant); requesting both fails the create. Zero-initialized => a
+/// case-sensitive, unkeyed FNV-1a table at the default capacity.
+typedef struct {
+    bool case_insensitive;   ///< case-insensitive keys (FNV-1a casecmp)
+    bool flooding_resistant; ///< keyed SipHash with a random per-table key
+    bool best_effort;        ///< flooding_resistant: degrade vs fail
+    size_t initial_capacity; ///< 0 => default
+} ht_str_options_t;
 
 ht_hash_t ht_hash_fnv1a(const void *, size_t, const void *);
 ht_hash_t ht_hash_fnv1a_casecmp(const void *, size_t, const void *);
@@ -79,16 +102,15 @@ size_t str_len(const void *);
 int ht_random_bytes(void *buf, size_t len);
 
 // Creation and destruction
-ht_t *ht_create(const ht_hash, const ht_keyeq, const ht_keylen,
-                const ht_callbacks_t *, const unsigned int);
+ht_t *ht_create(const ht_options_t *);
 void ht_destroy(ht_t *);
-ht_strdouble_t *ht_strdouble_create(unsigned int);
+ht_strdouble_t *ht_strdouble_create(const ht_str_options_t *);
 void ht_strdouble_destroy(ht_strdouble_t *);
-ht_strfloat_t *ht_strfloat_create(unsigned int);
+ht_strfloat_t *ht_strfloat_create(const ht_str_options_t *);
 void ht_strfloat_destroy(ht_strfloat_t *);
-ht_strint_t *ht_strint_create(unsigned int);
+ht_strint_t *ht_strint_create(const ht_str_options_t *);
 void ht_strint_destroy(ht_strint_t *);
-ht_strstr_t *ht_strstr_create(unsigned int);
+ht_strstr_t *ht_strstr_create(const ht_str_options_t *);
 void ht_strstr_destroy(ht_strstr_t *);
 
 // Insertion and removal

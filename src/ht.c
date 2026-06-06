@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define INITIAL_BUCKETS (16) // Initial table size
 #define MAX_LOAD_FACTOR                                                        \
@@ -206,12 +207,13 @@ static void __ht_rehash(ht_t *ht) {
  * function, a key equality comparison function, and optionally bucket
  * operations function callbacks structure.
  */
-ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
-                const ht_keylen keylen, const ht_callbacks_t *callbacks,
-                const unsigned int flags) {
+ht_t *ht_create(const ht_options_t *opts) {
     ht_t *ht = NULL;
 
-    if (!hfunc || !keyeq || !keylen) {
+    if (!opts || !opts->hash || !opts->keyeq || !opts->keylen) {
+        return NULL;
+    }
+    if (opts->key_mode == HT_KEY_PROVIDED && !opts->key) {
         return NULL;
     }
 
@@ -221,41 +223,48 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
         return NULL;
     }
 
-    ht->hfunc = hfunc;
-    ht->keyeq = keyeq;
-    ht->keylen = keylen;
+    ht->hfunc = opts->hash;
+    ht->keyeq = opts->keyeq;
+    ht->keylen = opts->keylen;
 
     ht->callbacks.key_copy = __ht_passthrough_copy;
     ht->callbacks.key_free = __ht_passthrough_destroy;
     ht->callbacks.val_copy = __ht_passthrough_copy;
     ht->callbacks.val_free = __ht_passthrough_destroy;
 
-    if (callbacks) {
-        if (callbacks->key_copy) {
-            ht->callbacks.key_copy = callbacks->key_copy;
-        }
-        if (callbacks->key_free) {
-            ht->callbacks.key_free = callbacks->key_free;
-        }
-        if (callbacks->val_copy) {
-            ht->callbacks.val_copy = callbacks->val_copy;
-        }
-        if (callbacks->val_free) {
-            ht->callbacks.val_free = callbacks->val_free;
-        }
+    if (opts->callbacks.key_copy) {
+        ht->callbacks.key_copy = opts->callbacks.key_copy;
+    }
+    if (opts->callbacks.key_free) {
+        ht->callbacks.key_free = opts->callbacks.key_free;
+    }
+    if (opts->callbacks.val_copy) {
+        ht->callbacks.val_copy = opts->callbacks.val_copy;
+    }
+    if (opts->callbacks.val_free) {
+        ht->callbacks.val_free = opts->callbacks.val_free;
     }
 
-    ht->capacity = INITIAL_BUCKETS;
+    ht->capacity =
+        opts->initial_capacity ? opts->initial_capacity : INITIAL_BUCKETS;
     ht->buckets = calloc(ht->capacity, sizeof(*ht->buckets));
     if (!ht->buckets) {
         perror("ht_create");
+        free(ht);
         return NULL;
     }
 
-    if (flags & HT_SEED_RANDOM) {
+    switch (opts->key_mode) {
+    case HT_KEY_NONE:
+        break;
+    case HT_KEY_PROVIDED:
+        memcpy(ht->hashkey, opts->key, HT_HASHKEY_MAX);
+        ht->keyed = true;
+        break;
+    case HT_KEY_RANDOM:
         if (ht_random_bytes(ht->hashkey, HT_HASHKEY_MAX) == 0) {
             ht->keyed = true;
-        } else if (flags & HT_SEED_BEST_EFFORT) {
+        } else if (opts->key_best_effort) {
             /// Entropy unavailable: proceed with the zeroed key buffer. The
             /// table is usable but a keyed hash is not flooding-resistant.
             ht->keyed = true;
@@ -265,6 +274,7 @@ ht_t *ht_create(const ht_hash hfunc, const ht_keyeq keyeq,
             free(ht);
             return NULL;
         }
+        break;
     }
 
     return ht;

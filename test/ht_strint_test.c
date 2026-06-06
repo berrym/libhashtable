@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
     ht_strint_t *ht = NULL;
 
-    ht = ht_strint_create(HT_STR_CASECMP | HT_SEED_RANDOM);
+    ht = ht_strint_create(&(ht_str_options_t){.case_insensitive = true});
     if (!ht) {
         exit(EXIT_FAILURE);
     }
