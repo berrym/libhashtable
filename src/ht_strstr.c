@@ -30,6 +30,7 @@ ht_strstr_t *ht_strstr_create(const ht_str_options_t *opts) {
         .callbacks = callbacks,
         .key_mode = o.flooding_resistant ? HT_KEY_RANDOM : HT_KEY_NONE,
         .key_best_effort = o.best_effort,
+        .insertion_ordered = o.insertion_ordered,
         .initial_capacity = o.initial_capacity,
     };
 

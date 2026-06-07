@@ -126,6 +126,7 @@ typedef struct {
     bool case_insensitive;   ///< case-insensitive keys (FNV-1a casecmp)
     bool flooding_resistant; ///< keyed SipHash with a random per-table key
     bool best_effort;        ///< flooding_resistant: degrade vs fail
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_str_options_t;
 
@@ -139,6 +140,7 @@ typedef struct {
 typedef struct {
     bool flooding_resistant; ///< keyed SipHash with a random per-table key
     bool best_effort;        ///< flooding_resistant: degrade vs fail
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_u64_options_t;
 

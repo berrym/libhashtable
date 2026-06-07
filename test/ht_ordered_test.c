@@ -172,8 +172,53 @@ static void test_collision_chain(void) {
     ht_destroy(ht);
 }
 
+/// A typed wrapper enumerates in insertion order when built with the
+/// insertion_ordered option.
+static void test_typed_wrapper_order(void) {
+    ht_strstr_t *ht =
+        ht_strstr_create(&(ht_str_options_t){.insertion_ordered = true});
+    if (!ht) {
+        fprintf(stderr, "ht_strstr_create failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    ht_strstr_insert(ht, "one", "1");
+    ht_strstr_insert(ht, "two", "2");
+    ht_strstr_insert(ht, "three", "3");
+    ht_strstr_remove(ht, "two");
+    ht_strstr_insert(ht, "four", "4");
+
+    const char *const want[] = {"one", "three", "four"};
+    const char *const want_val[] = {"1", "3", "4"};
+
+    ht_enum_t *he = ht_strstr_enum_create(ht);
+    if (!he) {
+        fprintf(stderr, "ht_strstr_enum_create failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    const char *k = NULL;
+    const char *v = NULL;
+    size_t i = 0;
+    while (ht_strstr_enum_next(he, &k, &v)) {
+        if (i >= 3 || strcmp(k, want[i]) != 0 || strcmp(v, want_val[i]) != 0) {
+            fprintf(stderr, "wrapper order wrong at %zu\n", i);
+            exit(EXIT_FAILURE);
+        }
+        i++;
+    }
+    if (i != 3) {
+        fprintf(stderr, "wrapper yielded %zu entries, expected 3\n", i);
+        exit(EXIT_FAILURE);
+    }
+
+    ht_strstr_enum_destroy(he);
+    ht_strstr_destroy(ht);
+}
+
 int main(void) {
     test_order_through_rehash();
     test_collision_chain();
+    test_typed_wrapper_order();
     return 0;
 }
