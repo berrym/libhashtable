@@ -66,12 +66,12 @@ typedef uint64_t ht_hash_t;
 typedef ht_hash_t (*ht_hash)(const void *key, size_t len, const void *hashkey);
 
 typedef bool (*ht_keyeq)(const void *,
-                         const void *);    ///< Key equality predicate
-typedef size_t (*ht_keylen)(const void *); ///< Key length in bytes
-typedef void *(*ht_kcopy)(const void *);   ///< Key copy callback
-typedef void (*ht_kfree)(const void *);    ///< Key free callback
-typedef void *(*ht_vcopy)(const void *);   ///< Value copy callback
-typedef void (*ht_vfree)(const void *);    ///< Value free callback
+                         const void *);          ///< Key equality predicate
+typedef size_t (*ht_keylen)(const void *);       ///< Key length in bytes
+typedef void *(*ht_kcopy)(const void *, void *); ///< Key copy callback
+typedef void (*ht_kfree)(const void *, void *);  ///< Key free callback
+typedef void *(*ht_vcopy)(const void *, void *); ///< Value copy callback
+typedef void (*ht_vfree)(const void *, void *);  ///< Value free callback
 
 /**
  * @brief Visitor invoked for each entry by ht_foreach.
@@ -85,8 +85,9 @@ typedef void (*ht_visit)(const void *key, const void *val, void *user_data);
 /**
  * @brief Key and value lifetime callbacks.
  *
- * Any NULL field defaults to passthrough: the table stores the pointer as given
- * and never frees it.
+ * Each callback receives the table's user_data (from ht_options_t) as its
+ * second argument. Any NULL field defaults to passthrough: the table stores the
+ * pointer as given and never frees it.
  */
 typedef struct {
     ht_kcopy key_copy; ///< Duplicate a key on insert
@@ -106,9 +107,11 @@ typedef struct {
     ht_keyeq keyeq;           ///< required
     ht_keylen keylen;         ///< required
     ht_callbacks_t callbacks; ///< zero-initialized => passthrough
+    void *user_data;          ///< forwarded to each callback's second argument
     ht_key_mode key_mode;     ///< default HT_KEY_NONE
     const void *key;          ///< HT_KEY_PROVIDED: 16 bytes of key material
     bool key_best_effort; ///< HT_KEY_RANDOM: degrade vs fail on CSPRNG failure
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_options_t;
 
@@ -123,6 +126,7 @@ typedef struct {
     bool case_insensitive;   ///< case-insensitive keys (FNV-1a casecmp)
     bool flooding_resistant; ///< keyed SipHash with a random per-table key
     bool best_effort;        ///< flooding_resistant: degrade vs fail
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_str_options_t;
 
@@ -136,8 +140,26 @@ typedef struct {
 typedef struct {
     bool flooding_resistant; ///< keyed SipHash with a random per-table key
     bool best_effort;        ///< flooding_resistant: degrade vs fail
+    bool insertion_ordered; ///< maintain + enumerate entries in insertion order
     size_t initial_capacity; ///< 0 => default
 } ht_u64_options_t;
+
+/**
+ * @brief A snapshot of a table's structural statistics, filled by ht_stats.
+ *
+ * All fields describe the table at the moment of the call. size and grow_count
+ * are tracked cheaply during normal operation; the remaining fields are derived
+ * by a single pass over the buckets, so ht_stats costs O(capacity) and imposes
+ * no cost on insert, lookup, or remove.
+ */
+typedef struct {
+    size_t size;             ///< entries stored
+    size_t capacity;         ///< bucket slots allocated
+    size_t occupied_buckets; ///< slots holding at least one entry
+    size_t max_chain;        ///< entries in the longest collision chain
+    size_t grow_count;       ///< grow-and-rehash events since creation
+    double load_factor;      ///< size / capacity (0 when capacity is 0)
+} ht_stats_t;
 
 /* Hash algorithm menu. Each matches the ht_hash signature; pick the algorithm
  * that fits the key shape. */
@@ -221,6 +243,21 @@ bool str_caseeq(const void *a, const void *b);
  * @return Length in bytes, excluding the terminating NUL.
  */
 size_t str_len(const void *key);
+
+/**
+ * @brief Duplicate a string key, for use as a key_copy callback.
+ * @param key NUL-terminated string key.
+ * @param user_data Unused.
+ * @return A heap copy of the string, or NULL on allocation failure.
+ */
+void *str_copy(const void *key, void *user_data);
+
+/**
+ * @brief Free a string key, for use as a key_free callback.
+ * @param key The stored key.
+ * @param user_data Unused.
+ */
+void str_free(const void *key, void *user_data);
 
 /**
  * @brief Fill a buffer with cryptographically strong random bytes.
@@ -667,7 +704,17 @@ void ht_clear(ht_t *ht);
  */
 void ht_foreach(const ht_t *ht, ht_visit visit, void *user_data);
 
-/* Enumeration. An enumeration object is a cursor over a table's entries. */
+/**
+ * @brief Collect a snapshot of the table's structural statistics.
+ * @param ht The table.
+ * @param out Destination snapshot; filled with zeros when ht is NULL.
+ * @note Reads the table without modifying it; costs O(capacity).
+ */
+void ht_stats(const ht_t *ht, ht_stats_t *out);
+
+/* Enumeration. An enumeration object is a cursor over a table's entries. A
+ * table built with insertion_ordered enumerates in insertion order; otherwise
+ * the order is unspecified. */
 
 /**
  * @brief Create a cursor over a generic table.
@@ -682,6 +729,8 @@ ht_enum_t *ht_enum_create(ht_t *ht);
  * @param key Out-pointer for the key (may be NULL).
  * @param val Out-pointer for the value (may be NULL).
  * @return true if an entry was returned, false at the end.
+ * @note On an insertion_ordered table entries are returned oldest-first; a
+ *       replaced key keeps its original position with its current value.
  */
 bool ht_enum_next(ht_enum_t *he, const void **key, const void **val);
 

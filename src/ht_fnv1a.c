@@ -14,6 +14,7 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 
@@ -57,3 +58,16 @@ bool str_caseeq(const void *a, const void *b) { return strcasecmp(a, b) == 0; }
 
 /// String key length (excludes the terminating NUL).
 size_t str_len(const void *key) { return strlen(key); }
+
+/// Duplicate a NUL-terminated string key. The user_data argument is unused.
+void *str_copy(const void *key, void *user_data) {
+    (void)user_data;
+    return strdup(key);
+}
+
+/// Free a string key previously produced by str_copy. The user_data argument
+/// is unused.
+void str_free(const void *key, void *user_data) {
+    (void)user_data;
+    free((void *)key);
+}

@@ -30,6 +30,21 @@ meson setup buildDir -Dexamples=true
 meson compile -C buildDir
 ```
 
+### Using it as a subproject
+
+The library registers a meson dependency, so a consuming project can vendor it
+through a wrap and link it without installing. Add a
+`subprojects/libhashtable.wrap` pinned to a release, then depend on it:
+
+```meson
+libhashtable_dep = dependency('libhashtable',
+                              fallback: ['libhashtable', 'libhashtable_dep'])
+
+executable('app', 'main.c', dependencies: libhashtable_dep)
+```
+
+Static versus shared linking follows the consumer's `default_library` setting.
+
 ## Usage
 
 The typed wrappers are the easy path — each pairs a key/value type with a
@@ -89,15 +104,44 @@ the keying material for keyed PRFs and NULL for unkeyed hashes.
   hashed with the integer finalizer.
 
 String-keyed wrappers take an `ht_str_options_t` (`case_insensitive`,
-`flooding_resistant`, `best_effort`, `initial_capacity`); integer-keyed
-wrappers take an `ht_u64_options_t`. A NULL options pointer selects the
-defaults.
+`flooding_resistant`, `best_effort`, `insertion_ordered`, `initial_capacity`);
+integer-keyed wrappers take an `ht_u64_options_t`. A NULL options pointer
+selects the defaults.
 
 ## Compound operations
 
 In addition to `ht_insert` / `ht_get` / `ht_remove`, the core provides
 `ht_size`, `ht_contains`, `ht_get_or_insert`, `ht_upsert`, `ht_clear`, and
 `ht_foreach`.
+
+## Insertion-order iteration
+
+Set `insertion_ordered` in the options to make a table remember the order in
+which keys were first inserted. Enumeration then yields entries oldest-first
+instead of in unspecified bucket order; replacing a key's value keeps the key
+at its original position. The order is maintained through table growth and
+removal.
+
+```c
+ht_strstr_t *log =
+    ht_strstr_create(&(ht_str_options_t){.insertion_ordered = true});
+ht_strstr_insert(log, "first", "1");
+ht_strstr_insert(log, "second", "2");
+/* enumeration returns "first" then "second" */
+```
+
+## Statistics
+
+`ht_stats(const ht_t *, ht_stats_t *)` fills a snapshot of a table's structure
+— `size`, `capacity`, `occupied_buckets`, `max_chain`, `grow_count`, and
+`load_factor`. It reads the table without modifying it and adds no cost to
+insert, lookup, or remove.
+
+## Per-table user data
+
+`ht_options_t` carries a `user_data` pointer that the table forwards as the
+second argument to every key/value lifetime callback, so a callback can reach a
+caller-owned allocator or context without a global.
 
 ## Thread safety
 
@@ -108,7 +152,7 @@ time-of-check-to-time-of-use sequences. There is no built-in lock.
 
 ## Version
 
-v0.8.0
+v0.9.0
 
 ## Authors
 

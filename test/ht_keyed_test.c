@@ -17,9 +17,7 @@
 #include <string.h>
 
 int main(void) {
-    const ht_callbacks_t cb = {
-        (void *(*)(const void *))strdup, (void (*)(const void *))free,
-        (void *(*)(const void *))strdup, (void (*)(const void *))free};
+    const ht_callbacks_t cb = {str_copy, str_free, str_copy, str_free};
 
     /// A SipHash-keyed table created at the base layer works end to end. The
     /// table must pass a non-NULL key to SipHash; if the wiring passed NULL

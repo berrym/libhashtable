@@ -23,9 +23,7 @@ static void count_visit(const void *key, const void *val, void *user_data) {
 }
 
 int main(void) {
-    const ht_callbacks_t cb = {
-        (void *(*)(const void *))strdup, (void (*)(const void *))free,
-        (void *(*)(const void *))strdup, (void (*)(const void *))free};
+    const ht_callbacks_t cb = {str_copy, str_free, str_copy, str_free};
     ht_t *ht = ht_create(&(ht_options_t){.hash = ht_hash_fnv1a,
                                          .keyeq = str_eq,
                                          .keylen = str_len,

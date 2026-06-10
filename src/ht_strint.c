@@ -16,8 +16,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/// Create a pointer duplicating val.
-static int *__intdup(const int *val) {
+/// Create a pointer duplicating val (value-copy callback). The user_data
+/// argument is unused.
+static void *__intdup(const void *val, void *user_data) {
+    (void)user_data;
     int *i = calloc(1, sizeof(int));
     if (!i) {
         perror("__intdup");
@@ -34,9 +36,7 @@ ht_strint_t *ht_strint_create(const ht_str_options_t *opts) {
         return NULL;
     }
 
-    const ht_callbacks_t callbacks = {
-        (void *(*)(const void *))strdup, (void (*)(const void *))free,
-        (void *(*)(const void *))__intdup, (void (*)(const void *))free};
+    const ht_callbacks_t callbacks = {str_copy, str_free, __intdup, str_free};
 
     const ht_options_t base = {
         .hash = o.flooding_resistant ? ht_hash_siphash
@@ -47,6 +47,7 @@ ht_strint_t *ht_strint_create(const ht_str_options_t *opts) {
         .callbacks = callbacks,
         .key_mode = o.flooding_resistant ? HT_KEY_RANDOM : HT_KEY_NONE,
         .key_best_effort = o.best_effort,
+        .insertion_ordered = o.insertion_ordered,
         .initial_capacity = o.initial_capacity,
     };
 

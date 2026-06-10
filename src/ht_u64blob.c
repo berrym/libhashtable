@@ -20,8 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/// Copy a uint64 key onto the heap (key-copy callback).
-static void *u64_key_copy(const void *key) {
+/// Copy a uint64 key onto the heap (key-copy callback). The user_data argument
+/// is unused.
+static void *u64_key_copy(const void *key, void *user_data) {
+    (void)user_data;
     uint64_t *k = malloc(sizeof(*k));
     if (!k) {
         perror("ht_u64blob_insert");
@@ -31,8 +33,12 @@ static void *u64_key_copy(const void *key) {
     return k;
 }
 
-/// Free a heap-copied uint64 key (key-free callback).
-static void u64_key_free(const void *key) { free((void *)key); }
+/// Free a heap-copied uint64 key (key-free callback). The user_data argument
+/// is unused.
+static void u64_key_free(const void *key, void *user_data) {
+    (void)user_data;
+    free((void *)key);
+}
 
 /// Compare two uint64 keys (key-equality callback).
 static bool u64_key_eq(const void *a, const void *b) {
@@ -51,8 +57,9 @@ typedef struct {
     size_t size;
 } ht_blob_t;
 
-/// Deep-copy a blob (value-copy callback).
-static void *blob_copy(const void *src) {
+/// Deep-copy a blob (value-copy callback). The user_data argument is unused.
+static void *blob_copy(const void *src, void *user_data) {
+    (void)user_data;
     const ht_blob_t *s = src;
     ht_blob_t *d = malloc(sizeof(*d));
     if (!d) {
@@ -76,8 +83,10 @@ static void *blob_copy(const void *src) {
     return d;
 }
 
-/// Free a blob and its owned bytes (value-free callback).
-static void blob_free(const void *blob) {
+/// Free a blob and its owned bytes (value-free callback). The user_data
+/// argument is unused.
+static void blob_free(const void *blob, void *user_data) {
+    (void)user_data;
     if (!blob) {
         return;
     }
@@ -100,6 +109,7 @@ ht_u64blob_t *ht_u64blob_create(const ht_u64_options_t *opts) {
         .callbacks = callbacks,
         .key_mode = o.flooding_resistant ? HT_KEY_RANDOM : HT_KEY_NONE,
         .key_best_effort = o.best_effort,
+        .insertion_ordered = o.insertion_ordered,
         .initial_capacity = o.initial_capacity,
     };
 

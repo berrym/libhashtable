@@ -24,3 +24,13 @@ libhashtable = library('hashtable',
                        include_directories : inc,
                        dependencies : libhashtable_deps,
                        install : true)
+
+# Consumable as a subproject: dependency('libhashtable', fallback: ...)
+# resolves to this, and override_dependency lets a plain dependency lookup
+# find it when this project is wrapped. Static vs shared follows the
+# consumer's default_library setting.
+libhashtable_dep = declare_dependency(
+  link_with : libhashtable,
+  include_directories : inc)
+
+meson.override_dependency('libhashtable', libhashtable_dep)

@@ -28,8 +28,9 @@ typedef struct {
     size_t size;
 } ht_blob_t;
 
-/// Deep-copy a blob (value-copy callback).
-static void *blob_copy(const void *src) {
+/// Deep-copy a blob (value-copy callback). The user_data argument is unused.
+static void *blob_copy(const void *src, void *user_data) {
+    (void)user_data;
     const ht_blob_t *s = src;
     ht_blob_t *d = malloc(sizeof(*d));
     if (!d) {
@@ -53,8 +54,10 @@ static void *blob_copy(const void *src) {
     return d;
 }
 
-/// Free a blob and its owned bytes (value-free callback).
-static void blob_free(const void *blob) {
+/// Free a blob and its owned bytes (value-free callback). The user_data
+/// argument is unused.
+static void blob_free(const void *blob, void *user_data) {
+    (void)user_data;
     if (!blob) {
         return;
     }
@@ -70,9 +73,7 @@ ht_strblob_t *ht_strblob_create(const ht_str_options_t *opts) {
         return NULL;
     }
 
-    const ht_callbacks_t callbacks = {(void *(*)(const void *))strdup,
-                                      (void (*)(const void *))free, blob_copy,
-                                      blob_free};
+    const ht_callbacks_t callbacks = {str_copy, str_free, blob_copy, blob_free};
 
     const ht_options_t base = {
         .hash = o.flooding_resistant ? ht_hash_siphash
@@ -83,6 +84,7 @@ ht_strblob_t *ht_strblob_create(const ht_str_options_t *opts) {
         .callbacks = callbacks,
         .key_mode = o.flooding_resistant ? HT_KEY_RANDOM : HT_KEY_NONE,
         .key_best_effort = o.best_effort,
+        .insertion_ordered = o.insertion_ordered,
         .initial_capacity = o.initial_capacity,
     };
 
