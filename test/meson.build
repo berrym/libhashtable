@@ -94,6 +94,17 @@ test_ht_ordered_exe = executable('test_ht_ordered',
 			                     include_directories : inc,
 			                     link_with : libhashtable)
 
+test_ht_functional_exe = executable('test_ht_functional',
+			                        'ht_functional_test.c',
+			                        include_directories : inc,
+			                        link_with : libhashtable)
+
+test_ht_integration_exe = executable('test_ht_integration',
+			                         'ht_integration_test.c',
+			                         include_directories : inc,
+			                         link_with : libhashtable,
+			                         c_args : ['-DHT_SRCROOT="' + meson.project_source_root() + '"'])
+
 test('libhashtable', test_ht_strstr_exe)
 test('libhashtable', test_ht_strint_exe)
 test('libhashtable', test_ht_strfloat_exe)
@@ -113,3 +124,5 @@ test('libhashtable', test_ht_strset_exe)
 test('libhashtable', test_ht_user_data_exe)
 test('libhashtable', test_ht_stats_exe)
 test('libhashtable', test_ht_ordered_exe)
+test('functional', test_ht_functional_exe)
+test('integration', test_ht_integration_exe)
