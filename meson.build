@@ -1,6 +1,6 @@
 project('libhashtable', 'c',
         default_options: 'c_std=c11',
-        version: '0.9.0',
+        version: '0.9.1',
         license: 'MIT')
 
 add_project_arguments('-D_XOPEN_SOURCE=700', language: 'c')
