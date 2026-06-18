@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(void) {
     ht_strdouble_t *ht = NULL;
 
     ht = ht_strdouble_create(&(ht_str_options_t){.case_insensitive = true});

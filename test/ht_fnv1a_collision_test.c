@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(void) {
     ht_strstr_t *ht = NULL;
     ht_enum_t *he = NULL;
     const char *a = NULL;
